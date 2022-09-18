@@ -1,0 +1,52 @@
+Lightmap Voxel Mesh [
+	Info [
+		The Lightmap Voxel Mesh is an Axis-Aligned lightmap which stores information
+		about how much light reaches each individual voxel position
+		
+		It's values will be affected by voxels with emissive properties from Voxel Meshes,
+		and it's values will also be effected by opaque geometry from voxels inside Voxel Meshes
+		
+		The lightmap's values will be recalculated only in specific regions when immediately required,
+		causing it to have very little performance effect when the geometry is completely static
+	]
+	
+	Full unwrapped 3D array on CPU [
+		8 bits: Red Light Level 
+		8 bits: Green Light Level
+		8 bits: Blue Light Level
+		
+		24 bits / 3 bytes
+		1000^3 area of voxels = 3 * 1000^3 = 3 gigabytes of CPU memory
+	]
+]
+
+Voxel Mesh [
+	Info [
+		Can be scaled or rotated to whatever, but it has to apply to all voxels in the mesh,
+		as of right now each mesh has a max radius of 127 voxels in all directions (x, y, z),
+		but they easily can be bound together to make bigger objects
+		
+		Emissive voxels in this mesh will affect the parent Lightmap Voxel Mesh, opaque objects
+		will also effect it by reducing the light levels in areas that have their LOS to another light
+		blocked
+	]
+	
+	Full unwrapped 3D array on CPU [
+		8 bits: Material ID
+		255 Unique Material IDs (for color, reflection, ect.)
+		
+		8 bits / 1 byte
+		255^3 area of voxels = 1 * 255^3 = 0.0166 gigabytes of CPU memory
+	]
+
+	Unordered array of visibile voxels on GPU [
+		8 bits: X Position
+		8 bits: Y Position
+		8 bits: Z Position
+		6 bits: Visible Faces 
+		8 bits: Material ID
+		
+		62 bits / 8 bytes (with 2 empty)
+		500 000 000 voxels = 8 * 500 000 000 = 4 gigabytes of GPU memory
+	]
+]
