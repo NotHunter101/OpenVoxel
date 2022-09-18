@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+./OpenVoxel/.vs
+./OpenVoxel/x64
