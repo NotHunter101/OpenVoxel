@@ -40,6 +40,8 @@ namespace Voxel
 			return false;
 		if (z < 0 || z >= this->voxelArrayDimensions.z)
 			return false;
+
+		return true;
 	}
 
 	std::vector<unsigned int>* VoxelMesh::GetVisibleVoxels()

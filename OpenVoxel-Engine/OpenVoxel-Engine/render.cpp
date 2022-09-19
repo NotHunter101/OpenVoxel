@@ -19,7 +19,7 @@ namespace Rendering
 
     Camera* targetCamera;
 
-    int InitRenderer(Voxel::VoxelWorld* world, float width, float height)
+    int InitRenderer(Voxel::VoxelWorld* world, float width, float height, std::string shaderPath)
     {
         voxelWorld = world;
 
@@ -30,9 +30,9 @@ namespace Rendering
         targetCamera->UpdateProjectionMatrix(60.0f, 0.1f, 500.0f, width, height);
         targetCamera->UpdateViewMatrix();
 
-        Shader vertexShader = Shader("Vertex", GL_VERTEX_SHADER, "vertex.glsl");
-        Shader fragmentShader = Shader("Fragment", GL_FRAGMENT_SHADER, "fragment.glsl");
-        Shader geometryShader = Shader("Geometry", GL_GEOMETRY_SHADER, "geometry.glsl");
+        Shader vertexShader = Shader("Vertex", GL_VERTEX_SHADER, shaderPath + "vertex.glsl");
+        Shader fragmentShader = Shader("Fragment", GL_FRAGMENT_SHADER, shaderPath + "fragment.glsl");
+        Shader geometryShader = Shader("Geometry", GL_GEOMETRY_SHADER, shaderPath + "geometry.glsl");
 
         if (!vertexShader.compiled || !fragmentShader.compiled || !geometryShader.compiled) {
             return -1;

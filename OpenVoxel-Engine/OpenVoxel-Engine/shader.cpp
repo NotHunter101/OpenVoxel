@@ -11,7 +11,7 @@
 
 namespace Rendering 
 {
-    Shader::Shader(std::string shaderTypeName, GLenum shaderType, const char* sourcePath)
+    Shader::Shader(std::string shaderTypeName, GLenum shaderType, std::string sourcePath)
     {
         std::ifstream shaderStream(sourcePath);
         std::string shaderSourceStr((std::istreambuf_iterator<char>(shaderStream)),

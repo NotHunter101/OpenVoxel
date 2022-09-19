@@ -33,4 +33,10 @@
 
 OpenVoxel-Engine/.vs
 OpenVoxel-Engine/x64
-OpenVoxel-Engine/OpenVoxel/x64
+OpenVoxel-Engine/OpenVoxel-Engine/x64
+
+OpenVoxel-Editor/.vs
+OpenVoxel-Editor/x64
+OpenVoxel-Editor/Debug
+OpenVoxel-Editor/OpenVoxel-Editor/x64
+OpenVoxel-Editor/OpenVoxel-Editor/Debug

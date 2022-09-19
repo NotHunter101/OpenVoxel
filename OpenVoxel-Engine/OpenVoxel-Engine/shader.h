@@ -12,7 +12,7 @@ namespace Rendering
 	public:
 		unsigned int ID;
 		bool compiled;
-		Shader(std::string shaderTypeName, GLenum shaderType, const char* sourcePath);
+		Shader(std::string shaderTypeName, GLenum shaderType, std::string sourcePath);
 
 		void Delete();
 	};

@@ -5,7 +5,7 @@
 
 namespace Rendering 
 {
-	int InitRenderer(Voxel::VoxelWorld* world, float width, float height);
+	int InitRenderer(Voxel::VoxelWorld* world, float width, float height, std::string shaderPath);
 	void RenderFrame();
 	void SetVoxels(int meshIndex);
 	void SetVisibleVoxels(int meshIndex);
