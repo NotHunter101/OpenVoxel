@@ -31,5 +31,6 @@
 *.out
 *.app
 
-./OpenVoxel/.vs
-./OpenVoxel/x64
+OpenVoxel/.vs
+OpenVoxel/x64
+OpenVoxel/OpenVoxel/x64

@@ -83,8 +83,13 @@ namespace Rendering
         glUseProgram(this->ID);
     }
 
-    void ShaderProgram::SetMat4x4(const char* uniformName, glm::mat4 mat4x4)
+    void ShaderProgram::SetMat4x4(const char* uniformName, glm::mat4 value)
     {
-        glUniformMatrix4fv(glGetUniformLocation(this->ID, uniformName), 1, GL_FALSE, glm::value_ptr(mat4x4));
+        glUniformMatrix4fv(glGetUniformLocation(this->ID, uniformName), 1, GL_FALSE, glm::value_ptr(value));
+    }
+
+    void ShaderProgram::SetUInt(const char* uniformName, unsigned int value)
+    {
+        glUniform1ui(glGetUniformLocation(this->ID, uniformName), value);
     }
 }

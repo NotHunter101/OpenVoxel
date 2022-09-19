@@ -43,7 +43,6 @@ int main()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glEnable(GL_DEPTH_TEST);
     glFrontFace(GL_CW);
-    //glCullFace(GL_FRONT);
     glEnable(GL_CULL_FACE);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -53,10 +52,24 @@ int main()
     Engine::OpenWorld* world = new Engine::OpenWorld();
     Engine::OpenObject* worldObject = new Engine::OpenObject("VoxelWorld");
     Voxel::VoxelWorld* voxelWorld = Engine::CreateComponent<Voxel::VoxelWorld>(worldObject);
+
+    glm::vec3 defaultOffset = glm::vec3(0.0f, 0.0f, -300.0f);
+
     Engine::OpenObject* meshObject = new Engine::OpenObject("VoxelMesh");
+    meshObject->transform->position = defaultOffset;
+    meshObject->transform->scale = glm::vec3(1.0f);
+
     Voxel::VoxelMesh* voxelMesh = Engine::CreateComponent<Voxel::VoxelMesh>(meshObject);
+    voxelMesh->InitalizeBuffer(glm::uvec3(1000, 1000, 1000));
     voxelWorld->AddMesh(voxelMesh);
-    voxelMesh->voxels[Voxel::PositionToPackedIndex(128, 128, 128)] = 1;
+
+    for (int x2 = 0; x2 < 1000; x2++) {
+        for (int y2 = 0; y2 < 1000; y2++) {
+            for (int z2 = 0; z2 < 1000; z2++) {
+                voxelMesh->voxels[voxelMesh->PositionToPackedIndex(x2, y2, z2)] = 1;
+            }
+        }
+    }
 
     std::cout << "Finished Initializing Voxel Memory\n";
 
@@ -77,8 +90,7 @@ int main()
         deltaWriteTimer += delta;
         deltaWriteCounter++;
 
-        meshObject->transform->position = glm::vec3(0.0f, 0.0f, sinf(time));
-        meshObject->transform->eulerRotation = glm::vec3(45.0f + sinf(time) * 90.0f, sinf(time) * 180.0f, 0.0f);
+        meshObject->transform->eulerRotation = glm::vec3(45.0f, sin(time) * 180.0f, 0.0f);
 
         if (deltaWriteTimer >= 1.0f) 
         {

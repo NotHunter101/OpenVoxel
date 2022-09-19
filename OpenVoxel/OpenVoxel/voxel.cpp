@@ -6,13 +6,6 @@
 
 namespace Voxel
 {
-	const int maxMeshSize = 255;
-
-	int PositionToPackedIndex(int x, int y, int z)
-	{
-		return x + (y * maxMeshSize) + (z * maxMeshSize * maxMeshSize);
-	}
-
 	void VoxelLightmap::Awake()
 	{
 		// Max size of world currently is 1000x1000x1000, otherwise lightmap stops affecting geometry
@@ -21,15 +14,35 @@ namespace Voxel
 
 	void VoxelMesh::Awake()
 	{
-		this->voxelArraySize = (int)pow(maxMeshSize, 3);
-		this->voxels = new uint8_t[voxelArraySize];
 		this->bufferDirty = false;
+	}
 
-		for (int i = 0; i < voxelArraySize; i++) 
+	void VoxelMesh::InitalizeBuffer(glm::uvec3 bufferDimensions) 
+	{
+		this->voxelArrayDimensions = bufferDimensions;
+		this->voxelArraySize = (int)(bufferDimensions.x * bufferDimensions.y * bufferDimensions.z);
+		this->voxels = new uint8_t[this->voxelArraySize];
+
+		for (int i = 0; i < voxelArraySize; i++)
 			this->voxels[i] = (uint8_t)0;
 	}
 
-	uint64_t* VoxelMesh::GetVisibleVoxels(int& count)
+	unsigned int VoxelMesh::PositionToPackedIndex(unsigned int x, unsigned int y, unsigned int z)
+	{
+		return x + (y * this->voxelArrayDimensions.x) + (z * this->voxelArrayDimensions.x * this->voxelArrayDimensions.y);
+	}
+
+	bool VoxelMesh::PositionInBounds(unsigned int x, unsigned int y, unsigned int z)
+	{
+		if (x < 0 || x >= this->voxelArrayDimensions.x)
+			return false;
+		if (y < 0 || y >= this->voxelArrayDimensions.y)
+			return false;
+		if (z < 0 || z >= this->voxelArrayDimensions.z)
+			return false;
+	}
+
+	std::vector<unsigned int>* VoxelMesh::GetVisibleVoxels()
 	{
 		bool* neighbors = new bool[6];
 
@@ -44,45 +57,32 @@ namespace Voxel
 		};
 		
 		// at most, only half the voxels can be visible at any time
-		int maxVisible = (int)truncf(powf(maxMeshSize, 3) * 0.5f);
-		uint64_t* visible = new uint64_t[maxVisible];
-		count = 0;
+		std::vector<unsigned int>* visible = new std::vector<unsigned int>();
 
-		for (int x = 0; x < maxMeshSize; x++) 
+		for (int x = 0; x < this->voxelArrayDimensions.x; x++) 
 		{
-			for (int y = 0; y < maxMeshSize; y++) 
+			for (int y = 0; y < this->voxelArrayDimensions.y; y++)
 			{
-				for (int z = 0; z < maxMeshSize; z++) 
+				for (int z = 0; z < this->voxelArrayDimensions.z; z++)
 				{
-					int myIndex = PositionToPackedIndex(x, y, z);
+					unsigned int myIndex = PositionToPackedIndex(x, y, z);
 					uint8_t material = this->voxels[myIndex];
 
 					if (material == 0)
 						continue;
 
-					bool anyFaceVisible = false;
 					for (int i = 0; i < 6; i++)
 					{
 						glm::vec3 offset = offsets[i];
-						int neighborIndex = PositionToPackedIndex(x + offset.x, y + offset.y, z + offset.z);
-						bool faceVisible = false;
+						int neighborIndex = this->PositionToPackedIndex(x + offset.x, y + offset.y, z + offset.z);
+						bool faceVisible = !this->PositionInBounds(x + offset.x, y + offset.y, z + offset.z) || this->voxels[neighborIndex] == 0;
 						
-						if (neighborIndex >= 0 && neighborIndex < this->voxelArraySize)
-							faceVisible = this->voxels[neighborIndex] == 0;
-						
-						neighbors[i] = faceVisible; // 0 = AIR
 						if (faceVisible)
-							anyFaceVisible = true;
+						{
+							visible->push_back(myIndex);
+							break;
+						}
 					}
-
-					if (!anyFaceVisible)
-						continue;
-
-					visible[count] = ((uint64_t)material << 54) | ((uint64_t)0 << 46) | ((uint64_t)0 << 38) | ((uint64_t)0 << 30) |
-						((uint64_t)neighbors[5] << 29) | ((uint64_t)neighbors[4] << 28) | ((uint64_t)neighbors[3] << 27) |
-						((uint64_t)neighbors[2] << 26) | ((uint64_t)neighbors[1] << 25) | ((uint64_t)neighbors[0] << 24) |
-						((uint64_t)z << 16) | ((uint64_t)y << 8) | ((uint64_t)x);
-					count++;
 				}
 			}
 		}
@@ -132,6 +132,11 @@ namespace Voxel
 		}
 
 		this->meshes[this->meshCount - 1] = mesh;
+	}
+
+	glm::uvec3 VoxelMesh::GetVoxelArrayDimensions()
+	{
+		return this->voxelArrayDimensions;
 	}
 
 	void VoxelWorld::Destroy()

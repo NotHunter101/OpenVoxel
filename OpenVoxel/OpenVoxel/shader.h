@@ -26,6 +26,7 @@ namespace Rendering
 		ShaderProgram();
 		
 		void UseProgram();
-		void SetMat4x4(const char* uniformName, glm::mat4);
+		void SetMat4x4(const char* uniformName, glm::mat4 value);
+		void SetUInt(const char* uniformName, unsigned int value);
 	};
 }

@@ -7,6 +7,9 @@ namespace Rendering
 {
 	int InitRenderer(Voxel::VoxelWorld* world, float width, float height);
 	void RenderFrame();
+	void SetVoxels(int meshIndex);
 	void SetVisibleVoxels(int meshIndex);
 	void SetMVP(Voxel::VoxelMesh* mesh, ShaderProgram program);
+	void SetFaceRotationMatrices(ShaderProgram program);
+	void SetVoxelBufferDimensions(Voxel::VoxelMesh* mesh, ShaderProgram program);
 }

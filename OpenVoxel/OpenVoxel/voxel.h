@@ -6,9 +6,6 @@
 
 namespace Voxel
 {
-	int PositionToPackedIndex(int x, int y, int z);
-	int PackedIndexToPosition(int packedIndex);
-
 	struct VoxelLightValue 
 	{
 		uint8_t rLight;
@@ -28,18 +25,23 @@ namespace Voxel
 
 	class VoxelMesh : public Engine::Component
 	{
+	private:
+		glm::uvec3 voxelArrayDimensions;
+		int voxelArraySize;
 	public:
 		using Engine::Component::Component;
 
-		int voxelArraySize;
 		std::uint8_t* voxels;
 		bool bufferDirty;
 
 		void Awake() override;
+		void InitalizeBuffer(glm::uvec3 bufferDimensions);
 
-		// Must be called every time there is a change in the "voxels" array
-		uint64_t* GetVisibleVoxels(int& count);
+		unsigned int PositionToPackedIndex(unsigned int x, unsigned int y, unsigned int z);
+		bool PositionInBounds(unsigned int x, unsigned int y, unsigned int z);
+		std::vector<unsigned int>* GetVisibleVoxels();
 		glm::mat4 GetModelMatrix();
+		glm::uvec3 GetVoxelArrayDimensions();
 		void Destroy() override;
 	};
 
