@@ -1,8 +1,0 @@
-﻿  main.cpp
-C:\Users\teamt\Documents\GitHub\OpenVoxel\OpenVoxel\OpenVoxel\render.h(3,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-C:\Users\teamt\Documents\GitHub\OpenVoxel\OpenVoxel\OpenVoxel\main.cpp(25,50): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\teamt\Documents\GitHub\OpenVoxel\OpenVoxel\OpenVoxel\main.cpp(25,43): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\teamt\Documents\GitHub\OpenVoxel\OpenVoxel\OpenVoxel\main.cpp(41,29): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\teamt\Documents\GitHub\OpenVoxel\OpenVoxel\OpenVoxel\main.cpp(41,22): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\teamt\Documents\GitHub\OpenVoxel\OpenVoxel\OpenVoxel\main.cpp(85,27): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-  OpenVoxel.vcxproj -> C:\Users\teamt\Documents\GitHub\OpenVoxel\OpenVoxel\x64\Debug\OpenVoxel.exe
