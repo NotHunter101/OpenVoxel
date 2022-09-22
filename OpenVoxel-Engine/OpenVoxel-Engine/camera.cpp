@@ -25,18 +25,16 @@ namespace Rendering
 		UpdateViewMatrix();
 	}
 
-	float Camera::GetFov() 
+	void PlayerController::Awake()
 	{
-		return this->fov;
+		this->childCamera = openObject->GetChild(0)->GetComponent<Camera>();
 	}
 
-	float Camera::GetNear()
+	void PlayerController::Update(float delta)
 	{
-		return this->near;
-	}
-
-	float Camera::GetFar()
-	{
-		return this->far;
+		/*f = glm::rotate(this->viewMatrix, -this->openObject->transform->eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		this->viewMatrix = glm::rotate(this->viewMatrix, -this->openObject->transform->eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		this->viewMatrix = glm::rotate(this->viewMatrix, -this->openObject->transform->eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::vec3 cameraForward = this->childCamera->transform->eulerRotation;*/
 	}
 }

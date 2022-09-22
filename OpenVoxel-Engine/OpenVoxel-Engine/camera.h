@@ -13,17 +13,23 @@ namespace Rendering
 		float near;
 		float far;
 	public:
-		using Engine::Component::Component;
-
 		glm::mat4 projectionMatrix;
 		glm::mat4 viewMatrix;
+
+		glm::mat4 rotateMatrix;
+		glm::mat4 translateMatrix;
 
 		void UpdateProjectionMatrix(float fov, float near, float far, float windowWidth, float windowHeight);
 		void UpdateViewMatrix();
 		void Update(float delta) override;
+	};
 
-		float GetFov();
-		float GetNear();
-		float GetFar();
+	class PlayerController : public Engine::Component
+	{
+	private:
+		Camera* childCamera;
+	public:
+		void Awake() override;
+		void Update(float delta) override;
 	};
 }

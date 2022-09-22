@@ -6,7 +6,7 @@
 
 namespace Engine 
 {
-	OpenWorld* worldInstance;
+	OpenWorld* WorldInstance;
 
 	void OpenWorld::AddObject(OpenObject* component)
 	{
@@ -43,7 +43,7 @@ namespace Engine
 
 	OpenWorld::OpenWorld() 
 	{
-		worldInstance = this;
+		WorldInstance = this;
 		this->objects = std::vector<OpenObject*>();
 	}
 
@@ -60,8 +60,38 @@ namespace Engine
 			this->objects[i]->Destroy();
 		}
 
-		delete worldInstance;
-		worldInstance = nullptr;
+		delete WorldInstance;
+		WorldInstance = nullptr;
+	}
+
+	void OpenObject::SetParent(OpenObject* parent)
+	{
+		if (this->parent != nullptr) {
+			int index = 0;
+			for (index = 0; index < this->parent->GetChildCount(); index++)
+				if (this->parent->GetChild(index) == this)
+					break;
+			this->parent->children.erase(this->parent->children.begin() + index);
+		}
+
+		this->parent = parent;
+		if (parent != nullptr)
+			parent->children.push_back(this);
+	}
+
+	OpenObject* OpenObject::GetParent()
+	{
+		return this->parent;
+	}
+
+	OpenObject* OpenObject::GetChild(int index)
+	{
+		return this->children[index];
+	}
+
+	int OpenObject::GetChildCount() 
+	{
+		return this->children.size();
 	}
 
 	void OpenObject::AddComponent(Component* component)
@@ -111,8 +141,9 @@ namespace Engine
 
 	void OpenObject::Initialize() 
 	{
-		worldInstance->AddObject(this);
+		WorldInstance->AddObject(this);
 		this->components = std::vector<Component*>();
+		this->children = std::vector<OpenObject*>();
 		this->transform = CreateComponent<Transform>(this);
 	}
 
@@ -133,11 +164,6 @@ namespace Engine
 		}
 
 		delete this;
-	}
-
-	Component::Component()
-	{
-		this->openObject = nullptr;
 	}
 
 	void Component::DestroyInternal()

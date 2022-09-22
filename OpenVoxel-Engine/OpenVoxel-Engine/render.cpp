@@ -19,15 +19,18 @@ namespace Rendering
 
     Camera* targetCamera;
 
-    int InitRenderer(Voxel::VoxelWorld* world, float width, float height, std::string shaderPath)
+    int InitRenderer(Voxel::VoxelWorld* world, int width, int height, std::string shaderPath)
     {
         voxelWorld = world;
 
+        Engine::OpenObject* playerObject = new Engine::OpenObject("Player");
         Engine::OpenObject* cameraObject = new Engine::OpenObject("Camera");
         targetCamera = Engine::CreateComponent<Camera>(cameraObject);
         targetCamera->openObject->transform->position = glm::vec3(0.0f, 0.0f, 4.0f);
+        cameraObject->SetParent(playerObject);
+        Engine::CreateComponent<Rendering::PlayerController>(playerObject);
 
-        targetCamera->UpdateProjectionMatrix(60.0f, 0.1f, 500.0f, width, height);
+        targetCamera->UpdateProjectionMatrix(60.0f, 0.1f, 750.0f, width, height);
         targetCamera->UpdateViewMatrix();
 
         Shader vertexShader = Shader("Vertex", GL_VERTEX_SHADER, shaderPath + "vertex.glsl");
@@ -99,6 +102,11 @@ namespace Rendering
             glBindVertexArray(0);
         }
 	}
+
+    void ChangeWindowSize(int width, int height)
+    {
+        targetCamera->UpdateProjectionMatrix(60.0f, 0.1f, 500.0f, width, height);
+    }
 
     void SetVoxels(int meshIndex) 
     {

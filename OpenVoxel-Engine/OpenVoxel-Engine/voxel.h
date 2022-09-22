@@ -16,8 +16,6 @@ namespace Voxel
 	class VoxelLightmap : public Engine::Component
 	{
 	public:
-		using Engine::Component::Component;
-
 		VoxelLightValue* lightValues;
 
 		void Awake() override;
@@ -29,8 +27,6 @@ namespace Voxel
 		glm::uvec3 voxelArrayDimensions;
 		int voxelArraySize;
 	public:
-		using Engine::Component::Component;
-
 		std::uint8_t* voxels;
 		bool bufferDirty;
 
@@ -48,10 +44,8 @@ namespace Voxel
 	class VoxelWorld : public Engine::Component
 	{
 	public:
-		using Engine::Component::Component;
-		
 		VoxelLightmap lightmap;
-		VoxelMesh** meshes;
+		std::vector<VoxelMesh*> meshes;
 		int meshCount;
 
 		void Awake() override;

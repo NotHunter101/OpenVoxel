@@ -13,7 +13,7 @@ out vec3 fragColor;
 
 void main() 
 {
-    fragColor = (gl_in[0].gl_Position.xyz + vec3(100.0f)) / vec3(200.0f);
+    fragColor = (gl_in[0].gl_Position.xyz + vec3(75.0f)) / vec3(150.0f);
 
     vec3 quad[4] = vec3[4](
         vec3(-0.5f, 0.5f, 0.5f),

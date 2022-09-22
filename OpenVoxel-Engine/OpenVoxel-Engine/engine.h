@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <string>
 #include <vector>
+#include <typeinfo>
 
 namespace Engine 
 {
@@ -11,6 +12,8 @@ namespace Engine
 	class OpenObject;
 	class Component;
 	class Transform;
+
+	extern OpenWorld* WorldInstance;
 
 	class OpenWorld 
 	{
@@ -33,17 +36,32 @@ namespace Engine
 	{
 	private:
 		std::vector<Component*> components;
+		std::vector<OpenObject*> children;
+		OpenObject* parent;
 
 		void Initialize();
 	public:
 		Transform* transform;
 		std::string name;
+
+		void SetParent(OpenObject* parent);
+		OpenObject* GetParent();
+		OpenObject* GetChild(int index);
+		int GetChildCount();
 		
 		void AddComponent(Component* component);
 		void RemoveComponent(Component* component);
 		void RemoveComponent(int componentIndex);
 		Component* GetComponent(int componentIndex);
 		int GetComponentCount();
+
+		template <class T>
+		T* GetComponent()
+		{
+			for (Component* component : this->components)
+				if (typeid(T).name() == typeid(*component).name())
+					return (T*)component;
+		}
 
 		OpenObject(std::string name);
 		OpenObject();
@@ -56,9 +74,8 @@ namespace Engine
 	{
 	public:
 		OpenObject* openObject;
+		Transform* transform;
 		
-		Component();
-
 		void DestroyInternal();
 		virtual void Awake() {};
 		virtual void Update(float delta) {};
@@ -68,8 +85,6 @@ namespace Engine
 	class Transform : public Component
 	{
 	public:
-		using Component::Component;
-
 		glm::vec3 position;
 		glm::vec3 eulerRotation;
 		glm::vec3 scale;
@@ -82,6 +97,7 @@ namespace Engine
 	{
 		T* component = new T();
 		component->openObject = object;
+		component->transform = object->transform;
 		object->AddComponent(component);
 		component->Awake();
 

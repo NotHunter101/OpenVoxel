@@ -113,27 +113,14 @@ namespace Voxel
 
 	void VoxelWorld::Awake()
 	{
-		this->meshes = new VoxelMesh*[0];
+		this->meshes = std::vector<VoxelMesh*>();
 		this->meshCount = 0;
 	}
 
 	void VoxelWorld::AddMesh(VoxelMesh* mesh)
 	{
-		VoxelMesh** oldMeshes = new VoxelMesh*[this->meshCount];
-		int oldMeshCount = this->meshCount;
-
-		for (int i = 0; i < this->meshCount; i++) {
-			oldMeshes[i] = this->meshes[i];
-		}
-
+		this->meshes.push_back(mesh);
 		this->meshCount++;
-		this->meshes = new VoxelMesh*[this->meshCount];
-
-		for (int i = 0; i < oldMeshCount; i++) {
-			this->meshes[i] = oldMeshes[i];
-		}
-
-		this->meshes[this->meshCount - 1] = mesh;
 	}
 
 	glm::uvec3 VoxelMesh::GetVoxelArrayDimensions()
@@ -144,6 +131,7 @@ namespace Voxel
 	void VoxelWorld::Destroy()
 	{
 		delete[] this->lightmap.lightValues;
-		delete[] this->meshes;
+		for (VoxelMesh* mesh : meshes) 
+			delete mesh;
 	}
 }

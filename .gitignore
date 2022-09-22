@@ -31,12 +31,19 @@
 *.out
 *.app
 
+
 OpenVoxel-Engine/.vs
 OpenVoxel-Engine/x64
+OpenVoxel-Engine/Debug
+OpenVoxel-Engine/Release
 OpenVoxel-Engine/OpenVoxel-Engine/x64
+OpenVoxel-Engine/OpenVoxel-Engine/Debug
+OpenVoxel-Engine/OpenVoxel-Engine/Release
 
 OpenVoxel-Editor/.vs
 OpenVoxel-Editor/x64
 OpenVoxel-Editor/Debug
+OpenVoxel-Editor/Release
 OpenVoxel-Editor/OpenVoxel-Editor/x64
 OpenVoxel-Editor/OpenVoxel-Editor/Debug
+OpenVoxel-Editor/OpenVoxel-Editor/Release

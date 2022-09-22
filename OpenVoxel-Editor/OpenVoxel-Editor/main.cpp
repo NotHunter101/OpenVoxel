@@ -3,6 +3,7 @@
 #include "render.h"
 #include "voxel.h"
 #include "engine.h"
+#include "editor.h"
 
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
@@ -47,25 +48,43 @@ int main()
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    Editor::EditorApplication* application = new Editor::EditorApplication();
+    Editor::ObjectView* objectView = Editor::CreateWindow<Editor::ObjectView>();
+    Editor::ObjectInspector* objectInspector = Editor::CreateWindow<Editor::ObjectInspector>();
+
     std::cout << "Initalizing Voxel Memory\n";
 
     Engine::OpenWorld* world = new Engine::OpenWorld();
     Engine::OpenObject* worldObject = new Engine::OpenObject("VoxelWorld");
     Voxel::VoxelWorld* voxelWorld = Engine::CreateComponent<Voxel::VoxelWorld>(worldObject);
 
-    glm::vec3 defaultOffset = glm::vec3(0.0f, 0.0f, -400.0f);
+    glm::vec3 defaultOffset = glm::vec3(0.0f, 0.0f, -250.0f);
+    
+    Engine::OpenObject* testObject1 = new Engine::OpenObject("Test1");
+    testObject1->SetParent(worldObject);
+
+    Engine::OpenObject* testObject2 = new Engine::OpenObject("Test2 (Child)");
+    testObject2->SetParent(testObject1);
+    Engine::OpenObject* testObject5 = new Engine::OpenObject("Test4 (Child)");
+    testObject5->SetParent(testObject1);
+
+    Engine::OpenObject* testObject3 = new Engine::OpenObject("Test3");
+    testObject3->SetParent(worldObject);
+
+    Engine::OpenObject* testObject4 = new Engine::OpenObject("");
 
     Engine::OpenObject* meshObject = new Engine::OpenObject("VoxelMesh");
+    meshObject->SetParent(worldObject);
     meshObject->transform->position = defaultOffset;
     meshObject->transform->scale = glm::vec3(1.0f);
 
     Voxel::VoxelMesh* voxelMesh = Engine::CreateComponent<Voxel::VoxelMesh>(meshObject);
-    voxelMesh->InitalizeBuffer(glm::uvec3(200, 200, 200));
+    voxelMesh->InitalizeBuffer(glm::uvec3(150, 150, 150));
     voxelWorld->AddMesh(voxelMesh);
 
-    for (int x2 = 0; x2 < 200; x2++) {
-        for (int y2 = 0; y2 < 200; y2++) {
-            for (int z2 = 0; z2 < 200; z2++) {
+    for (int x2 = 0; x2 < 150; x2++) {
+        for (int y2 = 0; y2 < 150; y2++) {
+            for (int z2 = 0; z2 < 150; z2++) {
                 voxelMesh->voxels[voxelMesh->PositionToPackedIndex(x2, y2, z2)] = 1;
             }
         }
@@ -103,13 +122,14 @@ int main()
         ImGui::NewFrame();
 
         ImGui::ShowDemoWindow(&showingDemoWindow);
+        application->RenderWindows();
 
         float time = timeSinceStart();
         deltaWriteTimer += delta;
         deltaWriteCounter++;
 
-        meshObject->transform->eulerRotation = glm::vec3(45.0f, sin(time) * 180.0f, 0.0f);
-        meshObject->transform->scale = glm::vec3(sin(time) * 0.5f + 0.5f, sin(time) * 0.5f + 0.5f, sin(time) * 0.5f + 0.5f);
+        meshObject->transform->eulerRotation = glm::vec3(45.0f, sin(time * 0.25f) * 180.0f, 0.0f);
+        //meshObject->transform->scale = glm::vec3(sin(time) * 0.5f + 0.5f, sin(time) * 0.5f + 0.5f, sin(time) * 0.5f + 0.5f);
 
         if (deltaWriteTimer >= 1.0f)
         {
@@ -133,6 +153,7 @@ int main()
     ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
 
+    application->Destroy();
     world->Destroy();
 
     glfwDestroyWindow(window);
@@ -151,6 +172,9 @@ float timeSinceStart()
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+
+    if (width != 0 && height != 0)
+        Rendering::ChangeWindowSize(width, height);
 }
 
 void processInput(GLFWwindow* window, ImGuiIO io)
