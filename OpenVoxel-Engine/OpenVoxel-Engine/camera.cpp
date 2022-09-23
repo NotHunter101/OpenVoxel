@@ -14,10 +14,12 @@ namespace Rendering
 
 	void Camera::UpdateViewMatrix() 
 	{
-		this->viewMatrix = glm::translate(glm::mat4(1.0f), -this->openObject->transform->position);
-		this->viewMatrix = glm::rotate(this->viewMatrix, -this->openObject->transform->eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-		this->viewMatrix = glm::rotate(this->viewMatrix, -this->openObject->transform->eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-		this->viewMatrix = glm::rotate(this->viewMatrix, -this->openObject->transform->eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		this->translateMatrix = glm::translate(glm::mat4(1.0f), -this->openObject->transform->position);
+		this->rotateMatrix = glm::rotate(glm::mat4(1.0f), -this->openObject->transform->eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		this->rotateMatrix = glm::rotate(this->rotateMatrix, -this->openObject->transform->eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		this->rotateMatrix = glm::rotate(this->rotateMatrix, -this->openObject->transform->eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	
+		this->viewMatrix = this->translateMatrix * this->rotateMatrix;
 	}
 
 	void Camera::Update(float delta)
@@ -32,6 +34,10 @@ namespace Rendering
 
 	void PlayerController::Update(float delta)
 	{
+		glm::vec3 cameraFoward = this->childCamera->rotateMatrix * glm::vec4(this->childCamera->transform->position, 1.0f);
+
+		//if ()
+
 		/*f = glm::rotate(this->viewMatrix, -this->openObject->transform->eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		this->viewMatrix = glm::rotate(this->viewMatrix, -this->openObject->transform->eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 		this->viewMatrix = glm::rotate(this->viewMatrix, -this->openObject->transform->eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));

@@ -129,7 +129,6 @@ int main()
         deltaWriteCounter++;
 
         meshObject->transform->eulerRotation = glm::vec3(45.0f, sin(time * 0.25f) * 180.0f, 0.0f);
-        //meshObject->transform->scale = glm::vec3(sin(time) * 0.5f + 0.5f, sin(time) * 0.5f + 0.5f, sin(time) * 0.5f + 0.5f);
 
         if (deltaWriteTimer >= 1.0f)
         {
