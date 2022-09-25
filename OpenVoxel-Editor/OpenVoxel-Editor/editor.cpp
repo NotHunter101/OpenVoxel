@@ -212,8 +212,6 @@ namespace Editor
 		const std::type_info* info = &typeid(ObjectView);
 		EditorWindow* window = ApplicationInstance->GetWindow(info);
 		this->objectViewWindow = (ObjectView*)window;
-
-		std::cout << window;
 	}
 
 	void ObjectInspector::Render()

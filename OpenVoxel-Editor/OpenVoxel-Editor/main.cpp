@@ -11,9 +11,13 @@
 #include <string>
 #include <chrono>
 
+#include "ImGUI/imgui.h"
+#include "ImGUI/imgui_impl_glfw.h"
+#include "ImGUI/imgui_impl_opengl3.h"
+
 std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 
-int main()
+int createGLFW()
 {
     float width = 1200.0f;
     float height = 720.0f;
@@ -92,7 +96,8 @@ int main()
 
     std::cout << "Finished Initializing Voxel Memory\n";
 
-    if (Rendering::InitRenderer(voxelWorld, width, height, "./Shaders/") == -1) {
+    // TODO: Fix the hardcoding on this by having a build action which copies the shaders into the build folder
+    if (Rendering::InitRenderer(voxelWorld, width, height, "C:\\Users\\teamt\\Documents\\GitHub\\OpenVoxel\\OpenVoxel-Sharp\\Shaders\\") == -1) {
         std::cout << "Rendering Init Failed!\n";
         return -1;
     }
@@ -115,7 +120,7 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        processInput(window, io);
+        processInput(window);
 
         ImGui_ImplGlfw_NewFrame();
         ImGui_ImplOpenGL3_NewFrame();
@@ -176,10 +181,10 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
         Rendering::ChangeWindowSize(width, height);
 }
 
-void processInput(GLFWwindow* window, ImGuiIO io)
+void processInput(GLFWwindow* window)
 {
-    if (io.WantCaptureKeyboard)
-        return;
+    //if (io.WantCaptureKeyboard)
+    //    return;
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);

@@ -16,9 +16,6 @@
     <Filter Include="ImGUI">
       <UniqueIdentifier>{0663f66f-a5d8-4f52-b3f9-68078d331e66}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{4d5d4f4c-28eb-4d85-8f80-215c9c239a2c}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImGUI\imgui_draw.cpp">
@@ -89,16 +86,5 @@
     <ClInclude Include="serializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Shaders\fragment.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\geometry.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\vertex.glsl">
-      <Filter>Shaders</Filter>
-    </None>
   </ItemGroup>
 </Project>
