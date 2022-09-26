@@ -144,6 +144,7 @@ namespace Engine
 		WorldInstance->AddObject(this);
 		this->components = std::vector<Component*>();
 		this->children = std::vector<OpenObject*>();
+		this->parent = nullptr;
 		this->transform = CreateComponent<Transform>(this);
 	}
 

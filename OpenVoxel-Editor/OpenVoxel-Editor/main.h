@@ -3,7 +3,11 @@
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
 
-int createGLFW();
-float timeSinceStart();
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
+namespace Game
+{
+	void InitializeGameAndWorld();
+	void StartGameLoop();
+	float TimeSinceStart();
+	void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+	void ProcessInput(GLFWwindow* window);
+}

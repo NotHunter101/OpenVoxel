@@ -7,26 +7,22 @@ using CLI;
 
 namespace Sharp
 {
-    internal class Program
+    public static class OpenVoxel
     {
-        class Test2 : ComponentTest 
-        {
-            public override void Test()
-            {
-                Console.WriteLine("BAR!");
-            }
-        }
-
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             GlfwApplication application = new GlfwApplication();
-
-            Test2 test = new Test2();
-            application.AddComponent(test);
-            application.TestInheritance();
-
+            application.Initialize();
             application.Start();
-            Console.ReadLine();
+        }
+
+        public static void CreateComponent<T>(this OpenObject openObject) where T : Component, new()
+        {
+            Component newComponent = new T();
+            newComponent.openObject = openObject;
+            newComponent.transform = openObject.transform;
+            newComponent.Awake();
+            openObject.AddComponent(newComponent);
         }
     }
 }

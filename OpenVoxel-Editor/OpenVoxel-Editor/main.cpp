@@ -15,177 +15,183 @@
 #include "ImGUI/imgui_impl_glfw.h"
 #include "ImGUI/imgui_impl_opengl3.h"
 
-std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-
-int createGLFW()
+namespace Game 
 {
-    float width = 1200.0f;
-    float height = 720.0f;
+    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    GLFWwindow* window;
+    Editor::EditorApplication* application;
+    Engine::OpenWorld* world;
 
-    GLFWwindow* window = glfwCreateWindow(width, height, "LearnOpenGL", NULL, NULL);
-    if (window == NULL)
+    void InitializeGameAndWorld()
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(0);
+        float width = 1200.0f;
+        float height = 720.0f;
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    glViewport(0, 0, width, height);
+        window = glfwCreateWindow(width, height, "LearnOpenGL", NULL, NULL);
+        if (window == NULL)
+        {
+            std::cout << "Failed to create GLFW window" << std::endl;
+            glfwTerminate();
+            return;
+        }
+        glfwMakeContextCurrent(window);
+        glfwSwapInterval(0);
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glEnable(GL_DEPTH_TEST);
-    glFrontFace(GL_CW);
-    glEnable(GL_CULL_FACE);
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        {
+            std::cout << "Failed to initialize GLAD" << std::endl;
+            return;
+        }
 
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+        glViewport(0, 0, width, height);
 
-    Editor::EditorApplication* application = new Editor::EditorApplication();
-    Editor::ObjectView* objectView = Editor::CreateWindow<Editor::ObjectView>();
-    Editor::ObjectInspector* objectInspector = Editor::CreateWindow<Editor::ObjectInspector>();
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glEnable(GL_DEPTH_TEST);
+        glFrontFace(GL_CW);
+        glEnable(GL_CULL_FACE);
 
-    std::cout << "Initalizing Voxel Memory\n";
+        glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
-    Engine::OpenWorld* world = new Engine::OpenWorld();
-    Engine::OpenObject* worldObject = new Engine::OpenObject("VoxelWorld");
-    Voxel::VoxelWorld* voxelWorld = Engine::CreateComponent<Voxel::VoxelWorld>(worldObject);
+        application = new Editor::EditorApplication();
+        Editor::ObjectView* objectView = Editor::CreateWindow<Editor::ObjectView>();
+        Editor::ObjectInspector* objectInspector = Editor::CreateWindow<Editor::ObjectInspector>();
 
-    glm::vec3 defaultOffset = glm::vec3(0.0f, 0.0f, -250.0f);
-    
-    Engine::OpenObject* testObject1 = new Engine::OpenObject("Test1");
-    testObject1->SetParent(worldObject);
+        std::cout << "Initalizing Voxel Memory\n";
 
-    Engine::OpenObject* testObject2 = new Engine::OpenObject("Test2 (Child)");
-    testObject2->SetParent(testObject1);
-    Engine::OpenObject* testObject5 = new Engine::OpenObject("Test4 (Child)");
-    testObject5->SetParent(testObject1);
+        world = new Engine::OpenWorld();
+        Engine::OpenObject* worldObject = new Engine::OpenObject("VoxelWorld");
+        Voxel::VoxelWorld* voxelWorld = Engine::CreateComponent<Voxel::VoxelWorld>(worldObject);
 
-    Engine::OpenObject* testObject3 = new Engine::OpenObject("Test3");
-    testObject3->SetParent(worldObject);
+        glm::vec3 defaultOffset = glm::vec3(0.0f, 0.0f, -250.0f);
 
-    Engine::OpenObject* testObject4 = new Engine::OpenObject("");
+        Engine::OpenObject* testObject1 = new Engine::OpenObject("Test1");
+        testObject1->SetParent(worldObject);
 
-    Engine::OpenObject* meshObject = new Engine::OpenObject("VoxelMesh");
-    meshObject->SetParent(worldObject);
-    meshObject->transform->position = defaultOffset;
-    meshObject->transform->scale = glm::vec3(1.0f);
+        Engine::OpenObject* testObject2 = new Engine::OpenObject("Test2 (Child)");
+        testObject2->SetParent(testObject1);
+        Engine::OpenObject* testObject5 = new Engine::OpenObject("Test4 (Child)");
+        testObject5->SetParent(testObject1);
 
-    Voxel::VoxelMesh* voxelMesh = Engine::CreateComponent<Voxel::VoxelMesh>(meshObject);
-    voxelMesh->InitalizeBuffer(glm::uvec3(150, 150, 150));
-    voxelWorld->AddMesh(voxelMesh);
+        Engine::OpenObject* testObject3 = new Engine::OpenObject("Test3");
+        testObject3->SetParent(worldObject);
 
-    for (int x2 = 0; x2 < 150; x2++) {
-        for (int y2 = 0; y2 < 150; y2++) {
-            for (int z2 = 0; z2 < 150; z2++) {
-                voxelMesh->voxels[voxelMesh->PositionToPackedIndex(x2, y2, z2)] = 1;
+        Engine::OpenObject* testObject4 = new Engine::OpenObject("");
+
+        Engine::OpenObject* meshObject = new Engine::OpenObject("VoxelMesh");
+        meshObject->SetParent(worldObject);
+        meshObject->transform->position = defaultOffset;
+        meshObject->transform->scale = glm::vec3(1.0f);
+
+        Voxel::VoxelMesh* voxelMesh = Engine::CreateComponent<Voxel::VoxelMesh>(meshObject);
+        voxelMesh->InitalizeBuffer(glm::uvec3(150, 150, 150));
+        voxelWorld->AddMesh(voxelMesh);
+
+        for (int x2 = 0; x2 < 150; x2++) {
+            for (int y2 = 0; y2 < 150; y2++) {
+                for (int z2 = 0; z2 < 150; z2++) {
+                    voxelMesh->voxels[voxelMesh->PositionToPackedIndex(x2, y2, z2)] = 1;
+                }
             }
         }
+
+        std::cout << "Finished Initializing Voxel Memory\n";
+
+        // TODO: Fix the hardcoding on this by having a build action which copies the shaders into the build folder
+        if (Rendering::InitRenderer(voxelWorld, width, height, "C:\\Users\\teamt\\Documents\\GitHub\\OpenVoxel\\OpenVoxel-Sharp\\Shaders\\") == -1) {
+            std::cout << "Rendering Init Failed!\n";
+            return;
+        }
     }
 
-    std::cout << "Finished Initializing Voxel Memory\n";
-
-    // TODO: Fix the hardcoding on this by having a build action which copies the shaders into the build folder
-    if (Rendering::InitRenderer(voxelWorld, width, height, "C:\\Users\\teamt\\Documents\\GitHub\\OpenVoxel\\OpenVoxel-Sharp\\Shaders\\") == -1) {
-        std::cout << "Rendering Init Failed!\n";
-        return -1;
-    }
-
-    std::cout << "About to start rendering...\n";
-
-    float delta = 0.0f;
-    float deltaWriteTimer = 0.0f;
-    int deltaWriteCounter = 0.0f;
-
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable some options
-
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(NULL);
-
-    bool showingDemoWindow = true;
-
-    while (!glfwWindowShouldClose(window))
+    void StartGameLoop() 
     {
-        glfwPollEvents();
-        processInput(window);
+        std::cout << "About to start rendering...\n";
 
-        ImGui_ImplGlfw_NewFrame();
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui::NewFrame();
+        float delta = 0.0f;
+        float deltaWriteTimer = 0.0f;
+        int deltaWriteCounter = 0.0f;
 
-        ImGui::ShowDemoWindow(&showingDemoWindow);
-        application->RenderWindows();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable some options
 
-        float time = timeSinceStart();
-        deltaWriteTimer += delta;
-        deltaWriteCounter++;
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init(NULL);
 
-        meshObject->transform->eulerRotation = glm::vec3(45.0f, sin(time * 0.25f) * 180.0f, 0.0f);
+        bool showingDemoWindow = true;
 
-        if (deltaWriteTimer >= 1.0f)
+        while (!glfwWindowShouldClose(window))
         {
-            float avgDelta = deltaWriteTimer / deltaWriteCounter;
-            deltaWriteTimer = 0.0f;
-            deltaWriteCounter = 0;
-            std::cout << "FPS: " + std::to_string(1.0f / avgDelta) + "\n";
+            glfwPollEvents();
+            ProcessInput(window);
+
+            ImGui_ImplGlfw_NewFrame();
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui::NewFrame();
+
+            ImGui::ShowDemoWindow(&showingDemoWindow);
+            application->RenderWindows();
+
+            float time = TimeSinceStart();
+            deltaWriteTimer += delta;
+            deltaWriteCounter++;
+
+            if (deltaWriteTimer >= 1.0f)
+            {
+                float avgDelta = deltaWriteTimer / deltaWriteCounter;
+                deltaWriteTimer = 0.0f;
+                deltaWriteCounter = 0;
+                std::cout << "FPS: " + std::to_string(1.0f / avgDelta) + "\n";
+            }
+
+            world->Update(delta);
+
+            ImGui::Render();
+            Rendering::RenderFrame();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+            glfwSwapBuffers(window);
+            delta = TimeSinceStart() - time;
         }
 
-        world->Update(delta);
+        ImGui_ImplGlfw_Shutdown();
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui::DestroyContext();
 
-        ImGui::Render();
-        Rendering::RenderFrame();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        application->Destroy();
+        world->Destroy();
 
-        glfwSwapBuffers(window);
-        delta = timeSinceStart() - time;
+        glfwDestroyWindow(window);
+        glfwTerminate();
     }
 
-    ImGui_ImplGlfw_Shutdown();
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui::DestroyContext();
+    float TimeSinceStart()
+    {
+        std::chrono::steady_clock::time_point timeNow = std::chrono::steady_clock::now();
+        std::chrono::milliseconds msSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(timeNow - start);
+        return msSinceStart.count() / 1000.0f;
+    }
 
-    application->Destroy();
-    world->Destroy();
+    void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
+    {
+        glViewport(0, 0, width, height);
 
-    glfwDestroyWindow(window);
-    glfwTerminate();
+        if (width != 0 && height != 0)
+            Rendering::ChangeWindowSize(width, height);
+    }
 
-    return 0;
-}
+    void ProcessInput(GLFWwindow* window)
+    {
+        //if (io.WantCaptureKeyboard)
+        //    return;
 
-float timeSinceStart()
-{
-    std::chrono::steady_clock::time_point timeNow = std::chrono::steady_clock::now();
-    std::chrono::milliseconds msSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(timeNow - start);
-    return msSinceStart.count() / 1000.0f;
-}
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-
-    if (width != 0 && height != 0)
-        Rendering::ChangeWindowSize(width, height);
-}
-
-void processInput(GLFWwindow* window)
-{
-    //if (io.WantCaptureKeyboard)
-    //    return;
-
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, true);
+    }
 }
