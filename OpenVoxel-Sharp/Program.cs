@@ -13,6 +13,12 @@ namespace Sharp
         {
             GlfwApplication application = new GlfwApplication();
             application.Initialize();
+
+            /* Here the target scene will be loaded and all the objects/components will be
+             * generated into the world. Right now test objects and components are being 
+             * generated on the C++ side, but that will eventually change when the editor is
+             * developed a little more. */
+
             application.Start();
         }
 
