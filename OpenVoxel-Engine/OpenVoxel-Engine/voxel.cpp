@@ -12,8 +12,16 @@ namespace Voxel
 		this->lightValues = new VoxelLightValue[pow(1000, 3)];
 	}
 
+	void VoxelLightmap::Destroy()
+	{
+		delete[] this->lightValues;
+	}
+
 	void VoxelMesh::Awake()
 	{
+		this->voxelArrayDimensions = glm::uvec3(0);
+		this->voxelArraySize = 0;
+		this->voxels = new uint8_t[0];
 		this->bufferDirty = false;
 	}
 
@@ -113,6 +121,7 @@ namespace Voxel
 
 	void VoxelWorld::Awake()
 	{
+		this->lightmap = new VoxelLightmap();
 		this->meshes = std::vector<VoxelMesh*>();
 		this->meshCount = 0;
 	}
@@ -126,12 +135,5 @@ namespace Voxel
 	glm::uvec3 VoxelMesh::GetVoxelArrayDimensions()
 	{
 		return this->voxelArrayDimensions;
-	}
-
-	void VoxelWorld::Destroy()
-	{
-		delete[] this->lightmap.lightValues;
-		for (VoxelMesh* mesh : meshes) 
-			delete mesh;
 	}
 }

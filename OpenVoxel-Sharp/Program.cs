@@ -46,7 +46,9 @@ namespace Sharp
              * generated on the C++ side, but that will eventually change when the editor is 
              * developed a little more. */
 
-            OpenObject newObjectTest = new OpenObject("Hello From Sharp");
+            SmartOpenObject newObjectTest = new SmartOpenObject("Hello From Sharp");
+            newObjectTest.obj.transform.position = new Vector3(0, 0, 0);
+            newObjectTest.obj = null;
             /*TestComponent test = CreateComponent<TestComponent>(newObjectTest);
             test.name = "!";
             test.number = 420;
@@ -55,9 +57,8 @@ namespace Sharp
 
             SerializeComponent(test);*/
 
-
-
             application.Start();
+            newObjectTest.obj.transform.position = new Vector3(0, 0, 0);
         }
 
         static Type[] nonManagedSerializableTypes = {

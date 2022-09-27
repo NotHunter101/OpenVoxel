@@ -15,31 +15,80 @@ namespace CLI
 	ref class Transform;
 	ref class GlfwApplication;
 
-	template <class T>
-	public ref class ClassWrapper
+	public ref class GenericClassWrapper
+	{ 
+	internal:
+		void* generalPointer;
+		bool pointerExternallyManaged;
+	};
+
+	public ref class GlfwApplication
 	{
 	internal:
-		T* instance;
+		int managedWrapperCount;
+		array<GenericClassWrapper^>^ managedWrappers;
+	public:
+		static GlfwApplication^ Instance;
+		GlfwApplication();
+
+		void Initialize();
+		void Start();
+
+		void AddManagedWrapper(GenericClassWrapper^ wrapper);
+		void RemoveManagedWrapper(GenericClassWrapper^ wrapper);
+	};
+
+	template <class T>
+	public ref class ClassWrapper : public GenericClassWrapper
+	{
+	internal:
+		property T* instance 
+		{
+			T* get()
+			{
+				return (T*)generalPointer;
+			}
+			void set(T* pointer)
+			{
+				generalPointer = pointer;
+			}
+		}
 
 	public:
 		ClassWrapper() 
 		{
-			instance = new T();
+			pointerExternallyManaged = false;
+			generalPointer = new T();
+			GlfwApplication::Instance->AddManagedWrapper(this);
 		}
 
 		ClassWrapper(T* instance)
 		{
-			this->instance = instance;
+			pointerExternallyManaged = true;
+			this->generalPointer = instance;
+			GlfwApplication::Instance->AddManagedWrapper(this);
 		}
 
 		~ClassWrapper()
 		{
-			delete instance;
+			if (generalPointer == nullptr)
+				return;
+
+			delete generalPointer;
+			generalPointer = nullptr;
+			GlfwApplication::Instance->RemoveManagedWrapper(this);
 		}
 
 		!ClassWrapper()
 		{
-			delete instance;
+			if (generalPointer == nullptr)
+				return;
+
+			if (!pointerExternallyManaged)
+				delete generalPointer;
+
+			generalPointer = nullptr;
+			GlfwApplication::Instance->RemoveManagedWrapper(this);
 		}
 	};
 
@@ -61,11 +110,38 @@ namespace CLI
 
 	public ref class OpenObject : public ClassWrapper<Engine::OpenObject>
 	{
-	public:
+	internal:
 		OpenObject(String^ name);
-		Transform^ transform;
 
+	public:
+		Transform^ transform;
 		void AddComponent(Component^ component);
+	};
+
+	public ref class SmartOpenObject 
+	{
+	private:
+		OpenObject^ internalObject;
+	public:
+		SmartOpenObject(String^ name)
+		{
+			internalObject = gcnew OpenObject(name);
+		}
+
+		property OpenObject^ obj {
+			OpenObject^ get() 
+			{
+				if (internalObject->generalPointer == nullptr)
+					return nullptr;
+
+				return internalObject;
+			}
+
+			void set(OpenObject^ object)
+			{
+				std::cout << "ERROR::Cannot set 'obj' property of SmartOpenObject" << std::endl;
+			}
+		};
 	};
 
 	private class ManagedComponent : public Engine::Component
@@ -161,15 +237,5 @@ namespace CLI
 				instance->eulerRotation = value->ToGlm();
 			}
 		}
-	};
-
-	public ref class GlfwApplication
-	{
-	public:
-		static GlfwApplication^ Instance;
-		GlfwApplication();
-
-		void Initialize();
-		void Start();
 	};
 }

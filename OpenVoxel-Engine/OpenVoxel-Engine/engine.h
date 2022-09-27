@@ -14,7 +14,9 @@ namespace Engine
 	class Transform;
 
 	extern OpenScene* SceneInstance;
+
 	void SetActiveScene(OpenScene* scene);
+	void SetSharpHeapManagerFunc(void (*function)(void*));
 
 	class OpenScene
 	{
@@ -39,7 +41,8 @@ namespace Engine
 		std::vector<Component*> components;
 		std::vector<OpenObject*> children;
 		OpenObject* parent;
-		
+		bool destroyed;
+
 		void Initialize();
 	public:
 		Transform* transform;

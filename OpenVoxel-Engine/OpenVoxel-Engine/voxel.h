@@ -19,6 +19,7 @@ namespace Voxel
 		VoxelLightValue* lightValues;
 
 		void Awake() override;
+		void Destroy() override;
 	};
 
 	class VoxelMesh : public Engine::Component
@@ -44,12 +45,11 @@ namespace Voxel
 	class VoxelWorld : public Engine::Component
 	{
 	public:
-		VoxelLightmap lightmap;
+		VoxelLightmap* lightmap;
 		std::vector<VoxelMesh*> meshes;
 		int meshCount;
 
 		void Awake() override;
 		void AddMesh(VoxelMesh* mesh);
-		void Destroy() override;
 	};
 }

@@ -7,10 +7,16 @@
 namespace Engine 
 {
 	OpenScene* SceneInstance;
+	void (*DeleteHandleFromSharpHeap)(void*);
 
 	void SetActiveScene(OpenScene* scene) 
 	{
 		SceneInstance = scene;
+	}	
+	
+	void SetSharpHeapManagerFunc(void (*function)(void*))
+	{
+		DeleteHandleFromSharpHeap = function;
 	}
 
 	void OpenScene::AddObject(OpenObject* object)
@@ -19,20 +25,16 @@ namespace Engine
 		this->objects.push_back(object);
 	}
 
-	void OpenScene::DeleteObject(OpenObject* component)
+	void OpenScene::DeleteObject(OpenObject* object)
 	{
-		int index = 0;
-		for (index = 0; index < this->objects.size(); index++) {
-			if (component == this->objects[index]) {
-				break;
-			}
-		}
-
-		this->DeleteObject(index);
+		this->DeleteObject(object->sceneIndex);
 	}
 
 	void OpenScene::DeleteObject(int objectIndex)
 	{
+		for (int i = objectIndex + 1; i < this->objects.size(); i++)
+			this->objects[i]->sceneIndex = i - 1;
+
 		this->objects[objectIndex]->Destroy();
 		this->objects.erase(this->objects.begin() + objectIndex);
 	}
@@ -134,12 +136,14 @@ namespace Engine
 
 	OpenObject::OpenObject(std::string name)
 	{
+		this->destroyed = false;
 		this->name = name;
 		this->Initialize();
 	}
 
 	OpenObject::OpenObject() 
 	{
+		this->destroyed = false;
 		this->name = "";
 		this->Initialize();
 	}
@@ -163,18 +167,29 @@ namespace Engine
 
 	void OpenObject::Destroy()
 	{
-		for (int i = 0; i < this->components.size(); i++) {
-			Component* comp = this->GetComponent(i);
-			comp->Destroy();
+		if (this->destroyed == true)
+			return;
+
+		int initialCompCount = this->components.size();
+		for (int i = 0; i < initialCompCount; i++) {
+			Component* comp = this->GetComponent(0);
 			comp->DestroyInternal();
 		}
 
+		this->destroyed = true;
+		SceneInstance->DeleteObject(this);
+
+		if (DeleteHandleFromSharpHeap != nullptr)
+			DeleteHandleFromSharpHeap(this);
 		delete this;
 	}
 
 	void Component::DestroyInternal()
 	{
 		this->openObject->RemoveComponent(this);
+		
+		if (DeleteHandleFromSharpHeap != nullptr)
+			DeleteHandleFromSharpHeap(this);
 		delete this;
 	}
 
