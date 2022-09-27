@@ -53,53 +53,55 @@ namespace Editor
 	void ObjectView::Initialize()
 	{
 		this->selectedObject = nullptr;
-		this->selectedObjectId = "";
-		this->objectDropdownsOpen = std::map<std::string, bool>();
+		this->selectedObjectIndex = 0;
+		this->oldSelectedObject = nullptr;
+		this->oldSelectedObjectIndex = 0;
+		this->objectDropdownsOpen = std::map<int, bool>();
 	}
 
 	ImGuiTreeNodeFlags baseFlags = ImGuiTreeNodeFlags_SpanAvailWidth;
 	ImGuiTreeNodeFlags noChildrenFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 	ImGuiTreeNodeFlags hasChildrenFlags = ImGuiTreeNodeFlags_OpenOnArrow;
 
-	void ObjectView::ShouldSelectNode(std::string id, Engine::OpenObject* object, bool wasJustOpen, bool isOpen)
+	void ObjectView::ShouldSelectNode(int objectIndex, Engine::OpenObject* object, bool wasJustOpen, bool isOpen)
 	{
 		bool clicked = ImGui::IsItemClicked();
 		bool justToggledDropdown = wasJustOpen != isOpen;
 
 		if (clicked && justToggledDropdown) {
-			this->selectedObjectId = this->previousSelectedObjectId;
-			this->selectedObject = this->previousSelectedObject;
+			this->selectedObjectIndex = this->oldSelectedObjectIndex;
+			this->selectedObject = this->oldSelectedObject;
 		}
 
 		bool shouldSelect = clicked && !justToggledDropdown;
 		if (!shouldSelect)
 			return;
 
-		this->selectedObjectId = id;
+		this->selectedObjectIndex = objectIndex;
 		this->selectedObject = object;
 	}
 
-	bool ObjectView::RegisterTreeNode(std::string id, bool hasChildren, const char* objectName, bool& wasAlreadyOpen)
+	bool ObjectView::RegisterTreeNode(int objectIndex, bool hasChildren, const char* objectName, bool& wasAlreadyOpen)
 	{
 		ImGuiTreeNodeFlags nodeFlags = baseFlags;
-		if (this->selectedObjectId == id)
+		if (this->selectedObjectIndex == objectIndex)
 			nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
 		nodeFlags |= (hasChildren ? hasChildrenFlags : noChildrenFlags);
 
-		bool openEntryIsInsideMap = hasChildren && this->objectDropdownsOpen.find(id) != this->objectDropdownsOpen.end();
-		wasAlreadyOpen = openEntryIsInsideMap && this->objectDropdownsOpen[id];
-		bool isOpen = ImGui::TreeNodeEx(&id, nodeFlags, objectName);
+		bool openEntryIsInsideMap = hasChildren && this->objectDropdownsOpen.find(objectIndex) != this->objectDropdownsOpen.end();
+		wasAlreadyOpen = openEntryIsInsideMap && this->objectDropdownsOpen[objectIndex];
+		bool isOpen = ImGui::TreeNodeEx((void*)(intptr_t)objectIndex, nodeFlags, objectName);
 
 		if (hasChildren) 
 		{
 			if (!openEntryIsInsideMap)
-				this->objectDropdownsOpen.insert({ id, isOpen });
+				this->objectDropdownsOpen.insert({ objectIndex, isOpen });
 			else
-				this->objectDropdownsOpen[id] = isOpen;
+				this->objectDropdownsOpen[objectIndex] = isOpen;
 		}
 
-		return hasChildren ? this->objectDropdownsOpen[id] : false;
+		return hasChildren ? this->objectDropdownsOpen[objectIndex] : false;
 	}
 
 	void ObjectView::PopulateChildren(int& index, bool& isRoot, Engine::OpenObject** targetObject, int& childDisplacement)
@@ -115,19 +117,15 @@ namespace Editor
 			if (targetChild->name != "")
 				objectName = targetChild->name.c_str();
 
-			std::string id = "ObjectView::ChildObject[" + std::to_string(index) + "][" + std::to_string(j) + "]";
 			bool wasAlreadyOpen;
-			bool open = this->RegisterTreeNode(id, hasChildren, objectName, wasAlreadyOpen);
-			this->ShouldSelectNode(id, targetChild, wasAlreadyOpen, open);
+			bool open = this->RegisterTreeNode(targetChild->sceneIndex, hasChildren, objectName, wasAlreadyOpen);
+			this->ShouldSelectNode(targetChild->sceneIndex, targetChild, wasAlreadyOpen, open);
 
 			if (hasChildren && open)
 			{
 				*targetObject = targetChild;
 				childDisplacement = 0;
-				
-				for (index = 0; index < Engine::WorldInstance->GetObjectCount(); index++)
-					if (Engine::WorldInstance->GetObject(index) == targetChild)
-						break;
+				index = targetChild->sceneIndex;
 
 				isRoot = false;
 				return;
@@ -144,8 +142,8 @@ namespace Editor
 					break;
 			childDisplacement++;
 
-			for (index = 0; index < Engine::WorldInstance->GetObjectCount(); index++)
-				if (Engine::WorldInstance->GetObject(index) == parent)
+			for (index = 0; index < Engine::SceneInstance->GetObjectCount(); index++)
+				if (Engine::SceneInstance->GetObject(index) == parent)
 					break;
 
 			isRoot = parent->GetParent() == nullptr;
@@ -158,24 +156,21 @@ namespace Editor
 	{
 		ImGui::Begin("Object View");
 
-		this->previousSelectedObject = this->selectedObject;
-		this->previousSelectedObjectId = this->selectedObjectId;
+		this->oldSelectedObject = this->selectedObject;
+		this->oldSelectedObjectIndex = this->selectedObjectIndex;
 
 		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton(0))) 
 		{
 			this->selectedObject = nullptr;
-			this->selectedObjectId = "";
+			this->selectedObjectIndex = 0;
 		}
-
-		std::string rootIdentifier = std::string("RootObject");
-		std::string childRootIdentifier = std::string("ChildRootObject");
 
 		bool isRoot = true;
 		int index = 0;
 
-		for (int i = 0; i < Engine::WorldInstance->GetObjectCount(); i++)
+		for (int i = 0; i < Engine::SceneInstance->GetObjectCount(); i++)
 		{
-			Engine::OpenObject* targetObject = Engine::WorldInstance->GetObject(i);
+			Engine::OpenObject* targetObject = Engine::SceneInstance->GetObject(i);
 			if (targetObject->GetParent() != nullptr)
 				continue;
 
@@ -186,10 +181,9 @@ namespace Editor
 			if (targetObject->name != "")
 				objectName = targetObject->name.c_str();
 
-			std::string id = "ObjectView::" + (isRoot ? rootIdentifier : childRootIdentifier) + "[" + std::to_string(index) + "]";
 			bool wasAlreadyOpen;
-			bool open = RegisterTreeNode(id, targetObject->GetChildCount() != 0, objectName, wasAlreadyOpen);
-			this->ShouldSelectNode(id, targetObject, wasAlreadyOpen, open);
+			bool open = RegisterTreeNode(targetObject->sceneIndex, targetObject->GetChildCount() != 0, objectName, wasAlreadyOpen);
+			this->ShouldSelectNode(targetObject->sceneIndex, targetObject, wasAlreadyOpen, open);
 
 			if (open)
 			{

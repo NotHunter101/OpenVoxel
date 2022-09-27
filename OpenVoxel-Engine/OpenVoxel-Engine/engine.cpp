@@ -6,14 +6,20 @@
 
 namespace Engine 
 {
-	OpenWorld* WorldInstance;
+	OpenScene* SceneInstance;
 
-	void OpenWorld::AddObject(OpenObject* component)
+	void SetActiveScene(OpenScene* scene) 
 	{
-		this->objects.push_back(component);
+		SceneInstance = scene;
 	}
 
-	void OpenWorld::DeleteObject(OpenObject* component)
+	void OpenScene::AddObject(OpenObject* object)
+	{
+		object->sceneIndex = this->objects.size();
+		this->objects.push_back(object);
+	}
+
+	void OpenScene::DeleteObject(OpenObject* component)
 	{
 		int index = 0;
 		for (index = 0; index < this->objects.size(); index++) {
@@ -25,43 +31,42 @@ namespace Engine
 		this->DeleteObject(index);
 	}
 
-	void OpenWorld::DeleteObject(int objectIndex)
+	void OpenScene::DeleteObject(int objectIndex)
 	{
 		this->objects[objectIndex]->Destroy();
 		this->objects.erase(this->objects.begin() + objectIndex);
 	}
 
-	OpenObject* OpenWorld::GetObject(int objectIndex)
+	OpenObject* OpenScene::GetObject(int objectIndex)
 	{
 		return this->objects[objectIndex];
 	}
 
-	int OpenWorld::GetObjectCount() 
+	int OpenScene::GetObjectCount()
 	{
 		return this->objects.size();
 	}
 
-	OpenWorld::OpenWorld() 
+	OpenScene::OpenScene()
 	{
-		WorldInstance = this;
 		this->objects = std::vector<OpenObject*>();
 	}
 
-	void OpenWorld::Update(float delta)
+	void OpenScene::Update(float delta)
 	{
 		for (int i = 0; i < this->objects.size(); i++) {
 			this->objects[i]->Update(delta);
 		}
 	}
 
-	void OpenWorld::Destroy()
+	void OpenScene::Destroy()
 	{
 		for (int i = 0; i < this->objects.size(); i++) {
 			this->objects[i]->Destroy();
 		}
 
-		delete WorldInstance;
-		WorldInstance = nullptr;
+		delete SceneInstance;
+		SceneInstance = nullptr;
 	}
 
 	void OpenObject::SetParent(OpenObject* parent)
@@ -141,7 +146,7 @@ namespace Engine
 
 	void OpenObject::Initialize() 
 	{
-		WorldInstance->AddObject(this);
+		SceneInstance->AddObject(this);
 		this->components = std::vector<Component*>();
 		this->children = std::vector<OpenObject*>();
 		this->parent = nullptr;

@@ -8,14 +8,15 @@
 
 namespace Engine 
 {
-	class OpenWorld;
+	class OpenScene;
 	class OpenObject;
 	class Component;
 	class Transform;
 
-	extern OpenWorld* WorldInstance;
+	extern OpenScene* SceneInstance;
+	void SetActiveScene(OpenScene* scene);
 
-	class OpenWorld 
+	class OpenScene
 	{
 	private:
 		std::vector<OpenObject*> objects;
@@ -26,7 +27,7 @@ namespace Engine
 		OpenObject* GetObject(int objectIndex);
 		int GetObjectCount();
 
-		OpenWorld();
+		OpenScene();
 
 		void Update(float delta);
 		void Destroy();
@@ -38,17 +39,18 @@ namespace Engine
 		std::vector<Component*> components;
 		std::vector<OpenObject*> children;
 		OpenObject* parent;
-
+		
 		void Initialize();
 	public:
 		Transform* transform;
 		std::string name;
+		int sceneIndex;
 
 		void SetParent(OpenObject* parent);
 		OpenObject* GetParent();
 		OpenObject* GetChild(int index);
 		int GetChildCount();
-		
+
 		void AddComponent(Component* component);
 		void RemoveComponent(Component* component);
 		void RemoveComponent(int componentIndex);

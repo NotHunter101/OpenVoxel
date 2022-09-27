@@ -43,7 +43,7 @@ namespace CLI
 		}
 	};
 
-	public ref struct Vector3 
+	public ref class Vector3 
 	{
 	internal:
 		static Vector3 FromGlm(const glm::vec3 vec);
@@ -123,42 +123,42 @@ namespace CLI
 	public ref class Transform : ComponentWrapper<Engine::Transform>
 	{
 	public:
-		property Vector3 postion
+		property Vector3^ position
 		{
 		public:
-			Vector3 get()
+			Vector3^ get()
 			{
-				return Vector3::FromGlm(instance->position);
+				return %Vector3::FromGlm(instance->position);
 			}
-			void set(Vector3 value)
+			void set(Vector3^ value)
 			{
-				instance->position = value.ToGlm();
+				instance->position = value->ToGlm();
 			}
 		}
 
-		property Vector3 scale
+		property Vector3^ scale
 		{
 		public:
-			Vector3 get()
+			Vector3^ get()
 			{
-				return Vector3::FromGlm(instance->scale);
+				return %Vector3::FromGlm(instance->scale);
 			}
-			void set(Vector3 value)
+			void set(Vector3^ value)
 			{
-				instance->scale = value.ToGlm();
+				instance->scale = value->ToGlm();
 			}
 		}
 
-		property Vector3 eulerRotation
+		property Vector3^ eulerRotation
 		{
 		public:
-			Vector3 get()
+			Vector3^ get()
 			{
-				return Vector3::FromGlm(instance->eulerRotation);
+				return %Vector3::FromGlm(instance->eulerRotation);
 			}
-			void set(Vector3 value)
+			void set(Vector3^ value)
 			{
-				instance->eulerRotation = value.ToGlm();
+				instance->eulerRotation = value->ToGlm();
 			}
 		}
 	};

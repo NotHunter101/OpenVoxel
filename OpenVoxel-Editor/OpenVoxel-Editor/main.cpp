@@ -21,7 +21,6 @@ namespace Game
 
     GLFWwindow* window;
     Editor::EditorApplication* application;
-    Engine::OpenWorld* world;
 
     void InitializeGameAndWorld()
     {
@@ -64,7 +63,8 @@ namespace Game
 
         std::cout << "Initalizing Voxel Memory\n";
 
-        world = new Engine::OpenWorld();
+        Engine::SetActiveScene(new Engine::OpenScene());
+
         Engine::OpenObject* worldObject = new Engine::OpenObject("VoxelWorld");
         Voxel::VoxelWorld* voxelWorld = Engine::CreateComponent<Voxel::VoxelWorld>(worldObject);
 
@@ -82,11 +82,14 @@ namespace Game
         testObject3->SetParent(worldObject);
 
         Engine::OpenObject* testObject4 = new Engine::OpenObject("");
+        Engine::OpenObject* testObject6 = new Engine::OpenObject("");
 
         Engine::OpenObject* meshObject = new Engine::OpenObject("VoxelMesh");
         meshObject->SetParent(worldObject);
         meshObject->transform->position = defaultOffset;
         meshObject->transform->scale = glm::vec3(1.0f);
+
+        testObject6->SetParent(meshObject);
 
         Voxel::VoxelMesh* voxelMesh = Engine::CreateComponent<Voxel::VoxelMesh>(meshObject);
         voxelMesh->InitalizeBuffer(glm::uvec3(150, 150, 150));
@@ -150,7 +153,7 @@ namespace Game
                 std::cout << "FPS: " + std::to_string(1.0f / avgDelta) + "\n";
             }
 
-            world->Update(delta);
+            Engine::SceneInstance->Update(delta);
 
             ImGui::Render();
             Rendering::RenderFrame();
@@ -165,7 +168,7 @@ namespace Game
         ImGui::DestroyContext();
 
         application->Destroy();
-        world->Destroy();
+        Engine::SceneInstance->Destroy();
 
         glfwDestroyWindow(window);
         glfwTerminate();

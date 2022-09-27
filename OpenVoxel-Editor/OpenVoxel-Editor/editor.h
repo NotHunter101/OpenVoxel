@@ -36,17 +36,17 @@ namespace Editor
 	class ObjectView : public EditorWindow
 	{
 	private:
-		Engine::OpenObject* previousSelectedObject;
-		std::string previousSelectedObjectId;
+		Engine::OpenObject* oldSelectedObject;
+		int oldSelectedObjectIndex;
 
 		Engine::OpenObject* selectedObject;
-		std::string selectedObjectId;
+		int selectedObjectIndex;
 
-		std::map<std::string, bool> objectDropdownsOpen;
+		std::map<int, bool> objectDropdownsOpen;
 
-		bool RegisterTreeNode(std::string id, bool hasChildren, const char* objectName, bool& wasAlreadyOpen);
+		bool RegisterTreeNode(int objectIndex, bool hasChildren, const char* objectName, bool& wasAlreadyOpen);
 		void PopulateChildren(int& index, bool& isRoot, Engine::OpenObject** targetObject, int& childDisplacement);
-		void ShouldSelectNode(std::string id, Engine::OpenObject* object, bool wasJustOpen, bool isOpen);
+		void ShouldSelectNode(int objectIndex, Engine::OpenObject* object, bool wasJustOpen, bool isOpen);
 	public:
 		void Initialize() override;
 		void Render() override;
@@ -60,6 +60,13 @@ namespace Editor
 	public:
 		void Initialize() override;
 		void Render() override;
+	};
+
+	class ProjectContent : public EditorWindow
+	{
+	public:
+		//void Initialize() override;
+		//void Render() override;
 	};
 
 	template<class T>
