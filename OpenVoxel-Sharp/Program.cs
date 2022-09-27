@@ -48,7 +48,7 @@ namespace Sharp
 
             SmartOpenObject newObjectTest = new SmartOpenObject("Hello From Sharp");
             newObjectTest.obj.transform.position = new Vector3(0, 0, 0);
-            newObjectTest.obj = null;
+
             /*TestComponent test = CreateComponent<TestComponent>(newObjectTest);
             test.name = "!";
             test.number = 420;
@@ -58,7 +58,6 @@ namespace Sharp
             SerializeComponent(test);*/
 
             application.Start();
-            newObjectTest.obj.transform.position = new Vector3(0, 0, 0);
         }
 
         static Type[] nonManagedSerializableTypes = {
@@ -113,13 +112,13 @@ namespace Sharp
             }
         }
 
-        public static T CreateComponent<T>(this OpenObject openObject) where T : Component, new()
+        public static T CreateComponent<T>(this SmartOpenObject openObject) where T : Component, new()
         {
             T newComponent = new T();
             newComponent.openObject = openObject;
-            newComponent.transform = openObject.transform;
+            newComponent.transform = openObject.obj.transform;
             newComponent.Awake();
-            openObject.AddComponent(newComponent);
+            openObject.obj.AddComponent(newComponent);
 
             return newComponent;
         }

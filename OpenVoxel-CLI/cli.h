@@ -161,7 +161,7 @@ namespace CLI
 	private interface struct IComponent 
 	{
 	public:
-		property OpenObject^ openObject;
+		property SmartOpenObject^ openObject;
 		property Transform^ transform;
 	};
 
@@ -169,14 +169,14 @@ namespace CLI
 	public ref class ComponentWrapper : public IComponent, public ClassWrapper<T>
 	{
 	protected:
-		OpenObject^ _openObject;
+		SmartOpenObject^ _openObject;
 		Transform^ _transform;
 
 	public:
-		property OpenObject^ openObject
+		property SmartOpenObject^ openObject
 		{
-			virtual OpenObject^ get() { return _openObject; }
-			virtual void set(OpenObject^ value) { _openObject = value; }
+			virtual SmartOpenObject^ get() { return _openObject; }
+			virtual void set(SmartOpenObject^ value) { _openObject = value; }
 		}
 
 		property Transform^ transform
