@@ -12,42 +12,36 @@ using CLI;
 
 namespace Sharp
 {
-    [Serializable]
-    public class TestClass 
-    {
-        public string name2;
-        public TestClass2 test2;
-    }
-
-    [Serializable]
-    public class TestClass2
-    {
-        public string name3;
-    }
-
-    [Serializable] 
+    /*[Serializable] 
     public class TestComponent : Component 
     {
         public string name;
         public int number;
         public Vector3 position;
         public TestClass test;
-    }
+    }*/
 
     public static class OpenVoxel
     {
+        private static GlfwApplication AppInstance;
+
         private static void Main(string[] args)
         {
-            GlfwApplication application = new GlfwApplication();
-            application.Initialize();
+            AppInstance = new GlfwApplication();
+            AppInstance.Initialize();
+
+            OpenObject obj = AppInstance.CreateObject("Hello From Sharp");
+
+            //OpenObject testOpenObject = CreateOpenObject("Hello From Sharp!");
+            //OpenObject testOpenObject2 = testOpenObject;
 
             /* Here the target scene will be loaded and all the objects/components will be 
              * generated into the world. Right now test objects and components are being 
              * generated on the C++ side, but that will eventually change when the editor is 
              * developed a little more. */
 
-            SmartOpenObject newObjectTest = new SmartOpenObject("Hello From Sharp");
-            newObjectTest.obj.transform.position = new Vector3(0, 0, 0);
+            //SmartOpenObject newObjectTest = new SmartOpenObject("Hello From Sharp");
+            //newObjectTest.obj.transform.position = new Vector3(0, 0, 0);
 
             /*TestComponent test = CreateComponent<TestComponent>(newObjectTest);
             test.name = "!";
@@ -57,7 +51,7 @@ namespace Sharp
 
             SerializeComponent(test);*/
 
-            application.Start();
+            AppInstance.Start();
         }
 
         static Type[] nonManagedSerializableTypes = {
@@ -112,7 +106,7 @@ namespace Sharp
             }
         }
 
-        public static T CreateComponent<T>(this SmartOpenObject openObject) where T : Component, new()
+        /*public static T CreateComponent<T>(this OpenObject openObject) where T : Component, new()
         {
             T newComponent = new T();
             newComponent.openObject = openObject;
@@ -121,6 +115,6 @@ namespace Sharp
             openObject.obj.AddComponent(newComponent);
 
             return newComponent;
-        }
+        }*/
     }
 }

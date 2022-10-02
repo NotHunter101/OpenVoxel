@@ -46,10 +46,10 @@ namespace Voxel
 	{
 	public:
 		VoxelLightmap* lightmap;
-		std::vector<VoxelMesh*> meshes;
+		std::vector<Engine::SharedPointer<VoxelMesh>*> meshes;
 		int meshCount;
 
 		void Awake() override;
-		void AddMesh(VoxelMesh* mesh);
+		void AddMesh(Engine::SharedPointer<VoxelMesh>* mesh);
 	};
 }

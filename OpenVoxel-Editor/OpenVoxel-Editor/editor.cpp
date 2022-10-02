@@ -63,7 +63,7 @@ namespace Editor
 	ImGuiTreeNodeFlags noChildrenFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 	ImGuiTreeNodeFlags hasChildrenFlags = ImGuiTreeNodeFlags_OpenOnArrow;
 
-	void ObjectView::ShouldSelectNode(int objectIndex, Engine::OpenObject* object, bool wasJustOpen, bool isOpen)
+	void ObjectView::ShouldSelectNode(int objectIndex, Engine::SharedPointer<Engine::OpenObject>* object, bool wasJustOpen, bool isOpen)
 	{
 		bool clicked = ImGui::IsItemClicked();
 		bool justToggledDropdown = wasJustOpen != isOpen;
@@ -104,28 +104,28 @@ namespace Editor
 		return hasChildren ? this->objectDropdownsOpen[objectIndex] : false;
 	}
 
-	void ObjectView::PopulateChildren(int& index, bool& isRoot, Engine::OpenObject** targetObject, int& childDisplacement)
+	void ObjectView::PopulateChildren(int& index, bool& isRoot, Engine::SharedPointer<Engine::OpenObject>** targetObject, int& childDisplacement)
 	{
-		Engine::OpenObject* target = *targetObject;
+		Engine::SharedPointer<Engine::OpenObject>* target = *targetObject;
 		 
-		for (int j = childDisplacement; j < target->GetChildCount(); j++)
+		for (int j = childDisplacement; j < target->Pointer()->GetChildCount(); j++)
 		{
-			Engine::OpenObject* targetChild = target->GetChild(j);
-			bool hasChildren = targetChild->GetChildCount() != 0;
+			Engine::SharedPointer<Engine::OpenObject>* targetChild = target->Pointer()->GetChild(j);
+			bool hasChildren = targetChild->Pointer()->GetChildCount() != 0;
 
 			const char* objectName = "[Empty Name]";
-			if (targetChild->name != "")
-				objectName = targetChild->name.c_str();
+			if (targetChild->Pointer()->name != "")
+				objectName = targetChild->Pointer()->name.c_str();
 
 			bool wasAlreadyOpen;
-			bool open = this->RegisterTreeNode(targetChild->sceneIndex, hasChildren, objectName, wasAlreadyOpen);
-			this->ShouldSelectNode(targetChild->sceneIndex, targetChild, wasAlreadyOpen, open);
+			bool open = this->RegisterTreeNode(targetChild->Pointer()->sceneIndex, hasChildren, objectName, wasAlreadyOpen);
+			this->ShouldSelectNode(targetChild->Pointer()->sceneIndex, targetChild, wasAlreadyOpen, open);
 
 			if (hasChildren && open)
 			{
 				*targetObject = targetChild;
 				childDisplacement = 0;
-				index = targetChild->sceneIndex;
+				index = targetChild->Pointer()->sceneIndex;
 
 				isRoot = false;
 				return;
@@ -134,11 +134,11 @@ namespace Editor
 
 		ImGui::TreePop();
 
-		Engine::OpenObject* parent = target->GetParent();
+		Engine::SharedPointer<Engine::OpenObject>* parent = target->Pointer()->GetParent();
 		if (parent != nullptr)
 		{
-			for (childDisplacement = 0; childDisplacement < parent->GetChildCount(); childDisplacement++)
-				if (parent->GetChild(childDisplacement) == target)
+			for (childDisplacement = 0; childDisplacement < parent->Pointer()->GetChildCount(); childDisplacement++)
+				if (parent->Pointer()->GetChild(childDisplacement) == target)
 					break;
 			childDisplacement++;
 
@@ -146,7 +146,7 @@ namespace Editor
 				if (Engine::SceneInstance->GetObject(index) == parent)
 					break;
 
-			isRoot = parent->GetParent() == nullptr;
+			isRoot = parent->Pointer()->GetParent() == nullptr;
 		}
 
 		*targetObject = parent;
@@ -170,20 +170,20 @@ namespace Editor
 
 		for (int i = 0; i < Engine::SceneInstance->GetObjectCount(); i++)
 		{
-			Engine::OpenObject* targetObject = Engine::SceneInstance->GetObject(i);
-			if (targetObject->GetParent() != nullptr)
+			Engine::SharedPointer<Engine::OpenObject>* targetObject = Engine::SceneInstance->GetObject(i);
+			if (targetObject->Pointer()->GetParent() != nullptr)
 				continue;
 
 			isRoot = true;
 			index = i;
 
 			const char* objectName = "[Empty Name]";
-			if (targetObject->name != "")
-				objectName = targetObject->name.c_str();
+			if (targetObject->Pointer()->name != "")
+				objectName = targetObject->Pointer()->name.c_str();
 
 			bool wasAlreadyOpen;
-			bool open = RegisterTreeNode(targetObject->sceneIndex, targetObject->GetChildCount() != 0, objectName, wasAlreadyOpen);
-			this->ShouldSelectNode(targetObject->sceneIndex, targetObject, wasAlreadyOpen, open);
+			bool open = RegisterTreeNode(targetObject->Pointer()->sceneIndex, targetObject->Pointer()->GetChildCount() != 0, objectName, wasAlreadyOpen);
+			this->ShouldSelectNode(targetObject->Pointer()->sceneIndex, targetObject, wasAlreadyOpen, open);
 
 			if (open)
 			{
@@ -196,7 +196,7 @@ namespace Editor
 		ImGui::End();
 	}
 
-	Engine::OpenObject* ObjectView::GetTargetedObject()
+	Engine::SharedPointer<Engine::OpenObject>* ObjectView::GetTargetedObject()
 	{
 		return this->selectedObject;
 	}
@@ -212,12 +212,12 @@ namespace Editor
 	{
 		ImGui::Begin("Object Inspector");
 
-		Engine::OpenObject* object = this->objectViewWindow->GetTargetedObject();
+		Engine::SharedPointer<Engine::OpenObject>* object = this->objectViewWindow->GetTargetedObject();
 		if (object != nullptr)
 		{
-			Serializer::DrawObjectGUI(object);
-			for (int i = 0; i < object->GetComponentCount(); i++) 
-				Serializer::DrawComponentGUI(object->GetComponent(i));
+			Serializer::DrawObjectGUI(object->Pointer());
+			for (int i = 0; i < object->Pointer()->GetComponentCount(); i++) 
+				Serializer::DrawComponentGUI(object->Pointer()->GetComponent(i)->Pointer());
 		}
 
 		ImGui::End();

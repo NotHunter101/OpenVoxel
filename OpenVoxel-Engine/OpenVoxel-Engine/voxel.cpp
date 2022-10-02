@@ -105,11 +105,11 @@ namespace Voxel
 	{
 		glm::mat4 model = glm::mat4(1.0f);
 
-		model = glm::scale(model, this->openObject->transform->scale);
-		model = glm::translate(model, this->openObject->transform->position);
-		model = glm::rotate(model, glm::radians(this->openObject->transform->eulerRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(this->openObject->transform->eulerRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(this->openObject->transform->eulerRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, this->openObject()->transform()->scale);
+		model = glm::translate(model, this->openObject()->transform()->position);
+		model = glm::rotate(model, glm::radians(this->openObject()->transform()->eulerRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(this->openObject()->transform()->eulerRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(this->openObject()->transform()->eulerRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 		
 		return model;
 	}
@@ -122,11 +122,11 @@ namespace Voxel
 	void VoxelWorld::Awake()
 	{
 		this->lightmap = new VoxelLightmap();
-		this->meshes = std::vector<VoxelMesh*>();
+		this->meshes = std::vector<Engine::SharedPointer<VoxelMesh>*>();
 		this->meshCount = 0;
 	}
 
-	void VoxelWorld::AddMesh(VoxelMesh* mesh)
+	void VoxelWorld::AddMesh(Engine::SharedPointer<VoxelMesh>* mesh)
 	{
 		this->meshes.push_back(mesh);
 		this->meshCount++;

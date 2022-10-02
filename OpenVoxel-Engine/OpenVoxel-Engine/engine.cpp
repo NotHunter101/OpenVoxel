@@ -7,39 +7,38 @@
 namespace Engine 
 {
 	OpenScene* SceneInstance;
-	void (*DeleteHandleFromSharpHeap)(void*);
 
-	void SetActiveScene(OpenScene* scene) 
+	void SetActiveScene(OpenScene* scene)
 	{
 		SceneInstance = scene;
-	}	
-	
-	void SetSharpHeapManagerFunc(void (*function)(void*))
-	{
-		DeleteHandleFromSharpHeap = function;
 	}
 
-	void OpenScene::AddObject(OpenObject* object)
+	SharedPointer<OpenObject>* OpenScene::AddObject(std::string name)
 	{
+		OpenObject* object = new OpenObject();
+		object->name = name;
+		object->Initialize();
 		object->sceneIndex = this->objects.size();
-		this->objects.push_back(object);
+
+		SharedPointer<OpenObject>* objectPtr = new SharedPointer<OpenObject>(object);
+		object->transformPtr = CreateComponent<Transform>(objectPtr);
+		this->objects.push_back(objectPtr);
+		return objectPtr;
 	}
 
 	void OpenScene::DeleteObject(OpenObject* object)
 	{
-		this->DeleteObject(object->sceneIndex);
+		int sceneIndex = (*object).sceneIndex;
+		for (int i = sceneIndex + 1; i < this->objects.size(); i++) {
+			this->objects[i]->Pointer()->sceneIndex = i - 1;
+		}
+
+		this->objects[sceneIndex]->Pointer()->Destroy();
+		this->objects[sceneIndex]->Delete();
+		this->objects.erase(this->objects.begin() + sceneIndex);
 	}
 
-	void OpenScene::DeleteObject(int objectIndex)
-	{
-		for (int i = objectIndex + 1; i < this->objects.size(); i++)
-			this->objects[i]->sceneIndex = i - 1;
-
-		this->objects[objectIndex]->Destroy();
-		this->objects.erase(this->objects.begin() + objectIndex);
-	}
-
-	OpenObject* OpenScene::GetObject(int objectIndex)
+	SharedPointer<OpenObject>* OpenScene::GetObject(int objectIndex)
 	{
 		return this->objects[objectIndex];
 	}
@@ -51,47 +50,65 @@ namespace Engine
 
 	OpenScene::OpenScene()
 	{
-		this->objects = std::vector<OpenObject*>();
+		this->objects = std::vector<SharedPointer<OpenObject>*>();
 	}
 
 	void OpenScene::Update(float delta)
 	{
 		for (int i = 0; i < this->objects.size(); i++) {
-			this->objects[i]->Update(delta);
+			this->objects[i]->Pointer()->Update(delta);
 		}
 	}
 
 	void OpenScene::Destroy()
 	{
 		for (int i = 0; i < this->objects.size(); i++) {
-			this->objects[i]->Destroy();
+			this->objects[i]->Pointer()->Destroy();
 		}
 
 		delete SceneInstance;
 		SceneInstance = nullptr;
 	}
 
-	void OpenObject::SetParent(OpenObject* parent)
+	void OpenObject::Initialize() 
 	{
-		if (this->parent != nullptr) {
+		this->children = std::vector<SharedPointer<OpenObject>*>();
+		this->components = std::vector<SharedPointer<Component>*>();
+		this->destroyed = false;
+		this->parentPtr = nullptr;
+	}
+
+	void OpenObject::SetParent(SharedPointer<OpenObject>* child, SharedPointer<OpenObject>* parent)
+	{
+		if (child->Pointer()->parent() != nullptr) {
 			int index = 0;
-			for (index = 0; index < this->parent->GetChildCount(); index++)
-				if (this->parent->GetChild(index) == this)
+			for (index = 0; index < child->Pointer()->parent()->GetChildCount(); index++)
+				if (child->Pointer()->parent()->GetChild(index) == child)
 					break;
-			this->parent->children.erase(this->parent->children.begin() + index);
+
+			std::vector<SharedPointer<OpenObject>*>* children = &child->Pointer()->parent()->children;
+			children->erase(children->begin() + index);
 		}
 
-		this->parent = parent;
+		if (parent != nullptr && !parent->PointerExists())
+		{
+			std::cout << "WARNING: Do not pass 'new SharedPointer<OpenObject>(nullptr)' as parent; pass 'nullptr' instead.";
+			delete parent;
+			parent = nullptr;
+		}
+
+		child->Pointer()->parentPtr = parent;
+
 		if (parent != nullptr)
-			parent->children.push_back(this);
+			parent->Pointer()->children.push_back(child);
 	}
 
-	OpenObject* OpenObject::GetParent()
+	SharedPointer<OpenObject>* OpenObject::GetParent()
 	{
-		return this->parent;
+		return this->parentPtr;
 	}
 
-	OpenObject* OpenObject::GetChild(int index)
+	SharedPointer<OpenObject>* OpenObject::GetChild(int index)
 	{
 		return this->children[index];
 	}
@@ -101,30 +118,42 @@ namespace Engine
 		return this->children.size();
 	}
 
-	void OpenObject::AddComponent(Component* component)
+	void OpenObject::AddComponent(SharedPointer<Component>* component)
 	{
 		this->components.push_back(component);
 	}
 
-	void OpenObject::RemoveComponent(Component* component)
+	void OpenObject::RemoveComponentInternal(Component* component) 
 	{
 		int index = 0;
 		for (index = 0; index < this->components.size(); index++) {
-			if (component == this->components[index]) {
+			if (component == this->components[index]->Pointer()) {
 				break;
+			}
+
+			if (index == this->components.size() - 1) {
+				std::cout << "ERROR: Component to be removed was not found on object" << std::endl;
+				return;
 			}
 		}
 
-		this->RemoveComponent(index);
+		this->components[index]->Pointer()->Destroy();
+		this->components[index]->Delete();
+		this->components.erase(this->components.begin() + index);
 	}
 
-	void OpenObject::RemoveComponent(int componentIndex)
+	void OpenObject::RemoveComponent(Component* component)
 	{
-		this->components[componentIndex]->Destroy();
-		this->components.erase(this->components.begin() + componentIndex);
+		if (component == this->transform())
+		{
+			std::cout << "ERROR: Component to be removed was of 'Transform' type! This is not possible" << std::endl;
+			return;
+		}
+
+		RemoveComponentInternal(component);
 	}
 
-	Component* OpenObject::GetComponent(int componentIndex)
+	SharedPointer<Component>* OpenObject::GetComponent(int componentIndex)
 	{
 		return this->components[componentIndex];
 	}
@@ -134,34 +163,11 @@ namespace Engine
 		return this->components.size();
 	}
 
-	OpenObject::OpenObject(std::string name)
-	{
-		this->destroyed = false;
-		this->name = name;
-		this->Initialize();
-	}
-
-	OpenObject::OpenObject() 
-	{
-		this->destroyed = false;
-		this->name = "";
-		this->Initialize();
-	}
-
-	void OpenObject::Initialize() 
-	{
-		SceneInstance->AddObject(this);
-		this->components = std::vector<Component*>();
-		this->children = std::vector<OpenObject*>();
-		this->parent = nullptr;
-		this->transform = CreateComponent<Transform>(this);
-	}
-
 	void OpenObject::Update(float delta) 
 	{
 		for (int i = 0; i < this->GetComponentCount(); i++)
 		{
-			this->GetComponent(i)->Update(delta);
+			this->GetComponent(i)->Pointer()->Update(delta);
 		}
 	}
 
@@ -172,25 +178,17 @@ namespace Engine
 
 		int initialCompCount = this->components.size();
 		for (int i = 0; i < initialCompCount; i++) {
-			Component* comp = this->GetComponent(0);
-			comp->DestroyInternal();
+			SharedPointer<Component>* comp = this->GetComponent(0);
+			comp->Pointer()->DestroyInternal();
 		}
 
 		this->destroyed = true;
 		SceneInstance->DeleteObject(this);
-
-		if (DeleteHandleFromSharpHeap != nullptr)
-			DeleteHandleFromSharpHeap(this);
-		delete this;
 	}
 
 	void Component::DestroyInternal()
 	{
-		this->openObject->RemoveComponent(this);
-		
-		if (DeleteHandleFromSharpHeap != nullptr)
-			DeleteHandleFromSharpHeap(this);
-		delete this;
+		this->openObject()->RemoveComponentInternal(this);
 	}
 
 	void Transform::Awake()

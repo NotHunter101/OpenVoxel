@@ -15,18 +15,10 @@ namespace CLI
 	ref class Transform;
 	ref class GlfwApplication;
 
-	public ref class GenericClassWrapper
-	{ 
-	internal:
-		void* generalPointer;
-		bool pointerExternallyManaged;
-	};
-
 	public ref class GlfwApplication
 	{
 	internal:
 		int managedWrapperCount;
-		array<GenericClassWrapper^>^ managedWrappers;
 	public:
 		static GlfwApplication^ Instance;
 		GlfwApplication();
@@ -34,21 +26,23 @@ namespace CLI
 		void Initialize();
 		void Start();
 
-		void AddManagedWrapper(GenericClassWrapper^ wrapper);
-		void RemoveManagedWrapper(GenericClassWrapper^ wrapper);
+		OpenObject^ CreateObject(String^ name);
 	};
 
 	template <class T>
-	public ref class ClassWrapper : public GenericClassWrapper
+	public ref class ClassWrapper
 	{
 	internal:
-		property T* instance 
+		Engine::SharedPointer<T>* generalPointer;
+		bool pointerExternallyManaged;
+
+		property Engine::SharedPointer<T>* instance
 		{
-			T* get()
+			Engine::SharedPointer<T>* get()
 			{
-				return (T*)generalPointer;
+				return (Engine::SharedPointer<T>*)generalPointer;
 			}
-			void set(T* pointer)
+			void set(Engine::SharedPointer<T>* pointer)
 			{
 				generalPointer = pointer;
 			}
@@ -58,15 +52,13 @@ namespace CLI
 		ClassWrapper() 
 		{
 			pointerExternallyManaged = false;
-			generalPointer = new T();
-			GlfwApplication::Instance->AddManagedWrapper(this);
+			generalPointer = new Engine::SharedPointer<T>(new T());
 		}
 
-		ClassWrapper(T* instance)
+		ClassWrapper(Engine::SharedPointer<T>* instance)
 		{
 			pointerExternallyManaged = true;
 			this->generalPointer = instance;
-			GlfwApplication::Instance->AddManagedWrapper(this);
 		}
 
 		~ClassWrapper()
@@ -74,9 +66,8 @@ namespace CLI
 			if (generalPointer == nullptr)
 				return;
 
-			delete generalPointer;
+			generalPointer->Delete();
 			generalPointer = nullptr;
-			GlfwApplication::Instance->RemoveManagedWrapper(this);
 		}
 
 		!ClassWrapper()
@@ -85,10 +76,8 @@ namespace CLI
 				return;
 
 			if (!pointerExternallyManaged)
-				delete generalPointer;
-
+				generalPointer->Delete();
 			generalPointer = nullptr;
-			GlfwApplication::Instance->RemoveManagedWrapper(this);
 		}
 	};
 
@@ -110,38 +99,11 @@ namespace CLI
 
 	public ref class OpenObject : public ClassWrapper<Engine::OpenObject>
 	{
-	internal:
+	public:
 		OpenObject(String^ name);
 
-	public:
 		Transform^ transform;
 		void AddComponent(Component^ component);
-	};
-
-	public ref class SmartOpenObject 
-	{
-	private:
-		OpenObject^ internalObject;
-	public:
-		SmartOpenObject(String^ name)
-		{
-			internalObject = gcnew OpenObject(name);
-		}
-
-		property OpenObject^ obj {
-			OpenObject^ get() 
-			{
-				if (internalObject->generalPointer == nullptr)
-					return nullptr;
-
-				return internalObject;
-			}
-
-			void set(OpenObject^ object)
-			{
-				std::cout << "ERROR::Cannot set 'obj' property of SmartOpenObject" << std::endl;
-			}
-		};
 	};
 
 	private class ManagedComponent : public Engine::Component
@@ -158,38 +120,18 @@ namespace CLI
 		void Destroy() override;
 	};
 
-	private interface struct IComponent 
-	{
-	public:
-		property SmartOpenObject^ openObject;
-		property Transform^ transform;
-	};
-
 	template <class T>
-	public ref class ComponentWrapper : public IComponent, public ClassWrapper<T>
+	public ref class ComponentWrapper : public ClassWrapper<T>
 	{
-	protected:
-		SmartOpenObject^ _openObject;
-		Transform^ _transform;
-
 	public:
-		property SmartOpenObject^ openObject
-		{
-			virtual SmartOpenObject^ get() { return _openObject; }
-			virtual void set(SmartOpenObject^ value) { _openObject = value; }
-		}
-
-		property Transform^ transform
-		{
-			virtual Transform^ get() { return _transform; }
-			virtual void set(Transform^ value);
-		}
+		OpenObject^ openObject;
+		Transform^ transform;
 	};
 
 	public ref class Component : public ComponentWrapper<ManagedComponent>
 	{
 	public:
-		Component();
+		Component() {}
 
 		virtual void Awake() {}
 		virtual void Update(float delta) {}
@@ -204,11 +146,11 @@ namespace CLI
 		public:
 			Vector3^ get()
 			{
-				return %Vector3::FromGlm(instance->position);
+				return %Vector3::FromGlm(instance->Pointer()->position);
 			}
 			void set(Vector3^ value)
 			{
-				instance->position = value->ToGlm();
+				instance->Pointer()->position = value->ToGlm();
 			}
 		}
 
@@ -217,11 +159,11 @@ namespace CLI
 		public:
 			Vector3^ get()
 			{
-				return %Vector3::FromGlm(instance->scale);
+				return %Vector3::FromGlm(instance->Pointer()->scale);
 			}
 			void set(Vector3^ value)
 			{
-				instance->scale = value->ToGlm();
+				instance->Pointer()->scale = value->ToGlm();
 			}
 		}
 
@@ -230,11 +172,11 @@ namespace CLI
 		public:
 			Vector3^ get()
 			{
-				return %Vector3::FromGlm(instance->eulerRotation);
+				return %Vector3::FromGlm(instance->Pointer()->eulerRotation);
 			}
 			void set(Vector3^ value)
 			{
-				instance->eulerRotation = value->ToGlm();
+				instance->Pointer()->eulerRotation = value->ToGlm();
 			}
 		}
 	};

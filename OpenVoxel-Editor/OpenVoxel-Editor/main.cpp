@@ -65,40 +65,25 @@ namespace Game
 
         Engine::SetActiveScene(new Engine::OpenScene());
 
-        Engine::OpenObject* worldObject = new Engine::OpenObject("VoxelWorld");
-        Voxel::VoxelWorld* voxelWorld = Engine::CreateComponent<Voxel::VoxelWorld>(worldObject);
+        Engine::SharedPointer<Engine::OpenObject>* worldObject = Engine::SceneInstance->AddObject("VoxelWorld");
+        Engine::SharedPointer<Voxel::VoxelWorld>* voxelWorld = Engine::CreateComponent<Voxel::VoxelWorld>(worldObject);
 
         glm::vec3 defaultOffset = glm::vec3(0.0f, 0.0f, -250.0f);
 
-        Engine::OpenObject* testObject1 = new Engine::OpenObject("Test1");
-        testObject1->SetParent(worldObject);
+        Engine::SharedPointer<Engine::OpenObject>* meshObject = Engine::SceneInstance->AddObject("VoxelMesh");
+        Engine::OpenObject::SetParent(meshObject, worldObject);
 
-        Engine::OpenObject* testObject2 = new Engine::OpenObject("Test2 (Child)");
-        testObject2->SetParent(testObject1);
-        Engine::OpenObject* testObject5 = new Engine::OpenObject("Test4 (Child)");
-        testObject5->SetParent(testObject1);
+        meshObject->Pointer()->transform()->position = defaultOffset;
+        meshObject->Pointer()->transform()->scale = glm::vec3(1.0f);
 
-        Engine::OpenObject* testObject3 = new Engine::OpenObject("Test3");
-        testObject3->SetParent(worldObject);
-
-        Engine::OpenObject* testObject4 = new Engine::OpenObject("");
-        Engine::OpenObject* testObject6 = new Engine::OpenObject("");
-
-        Engine::OpenObject* meshObject = new Engine::OpenObject("VoxelMesh");
-        meshObject->SetParent(worldObject);
-        meshObject->transform->position = defaultOffset;
-        meshObject->transform->scale = glm::vec3(1.0f);
-
-        testObject6->SetParent(meshObject);
-
-        Voxel::VoxelMesh* voxelMesh = Engine::CreateComponent<Voxel::VoxelMesh>(meshObject);
-        voxelMesh->InitalizeBuffer(glm::uvec3(150, 150, 150));
-        voxelWorld->AddMesh(voxelMesh);
+        Engine::SharedPointer<Voxel::VoxelMesh>* voxelMesh = Engine::CreateComponent<Voxel::VoxelMesh>(meshObject);
+        voxelMesh->Pointer()->InitalizeBuffer(glm::uvec3(150, 150, 150));
+        voxelWorld->Pointer()->AddMesh(voxelMesh);
 
         for (int x2 = 0; x2 < 150; x2++) {
             for (int y2 = 0; y2 < 150; y2++) {
                 for (int z2 = 0; z2 < 150; z2++) {
-                    voxelMesh->voxels[voxelMesh->PositionToPackedIndex(x2, y2, z2)] = 1;
+                    voxelMesh->Pointer()->voxels[voxelMesh->Pointer()->PositionToPackedIndex(x2, y2, z2)] = 1;
                 }
             }
         }

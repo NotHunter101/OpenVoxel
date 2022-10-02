@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 #include <typeinfo>
+#include <stdexcept>
+#include <iostream>
 
 namespace Engine 
 {
@@ -16,17 +18,54 @@ namespace Engine
 	extern OpenScene* SceneInstance;
 
 	void SetActiveScene(OpenScene* scene);
-	void SetSharpHeapManagerFunc(void (*function)(void*));
+
+	template <class T>
+	class SharedPointer 
+	{
+	private:
+		T* pointer;
+	public:
+		SharedPointer(T* pointer) 
+		{
+			this->pointer = pointer;
+		}
+
+		void SetPointer(T* pointer) 
+		{
+			this->pointer = pointer;
+		}
+
+		void Delete() 
+		{
+			delete this->pointer;
+			this->pointer = nullptr;
+			delete this;
+		}
+
+		bool PointerExists() 
+		{
+			return pointer != nullptr;
+		}
+
+		T* Pointer() const
+		{
+			if (pointer == nullptr) {
+				std::cout << "ERROR: Pointer is being accessed when the underlying memory has been deleted (Are you using a destroyed object?)" << std::endl;
+				throw std::runtime_error("");
+			}
+
+			return pointer;
+		}
+	};
 
 	class OpenScene
 	{
 	private:
-		std::vector<OpenObject*> objects;
+		std::vector<SharedPointer<OpenObject>*> objects;
 	public:
-		void AddObject(OpenObject* object);
+		SharedPointer<OpenObject>* AddObject(std::string name);
 		void DeleteObject(OpenObject* object);
-		void DeleteObject(int objectIndex);
-		OpenObject* GetObject(int objectIndex);
+		SharedPointer<OpenObject>* GetObject(int objectIndex);
 		int GetObjectCount();
 
 		OpenScene();
@@ -38,38 +77,48 @@ namespace Engine
 	class OpenObject 
 	{
 	private:
-		std::vector<Component*> components;
-		std::vector<OpenObject*> children;
-		OpenObject* parent;
+		std::vector<SharedPointer<Component>*> components;
+		std::vector<SharedPointer<OpenObject>*> children;
+		SharedPointer<OpenObject>* parentPtr;
+		OpenObject* parent() {
+			if (parentPtr == nullptr)
+				return nullptr;
+			return parentPtr->Pointer();
+		}
 		bool destroyed;
 
-		void Initialize();
 	public:
-		Transform* transform;
+		OpenObject() {}
+		void Initialize();
+
+		SharedPointer<Transform>* transformPtr;
+		Transform* transform() {
+			if (transformPtr == nullptr)
+				return nullptr;
+			return transformPtr->Pointer();
+		}
+
 		std::string name;
 		int sceneIndex;
 
-		void SetParent(OpenObject* parent);
-		OpenObject* GetParent();
-		OpenObject* GetChild(int index);
+		static void SetParent(SharedPointer<OpenObject>* child, SharedPointer<OpenObject>* parent);
+		SharedPointer<OpenObject>* GetParent();
+		SharedPointer<OpenObject>* GetChild(int index);
 		int GetChildCount();
 
-		void AddComponent(Component* component);
+		void AddComponent(SharedPointer<Component>* component);
+		void RemoveComponentInternal(Component* component);
 		void RemoveComponent(Component* component);
-		void RemoveComponent(int componentIndex);
-		Component* GetComponent(int componentIndex);
+		SharedPointer<Component>* GetComponent(int componentIndex);
 		int GetComponentCount();
 
 		template <class T>
-		T* GetComponent()
+		SharedPointer<T>* GetComponent()
 		{
-			for (Component* component : this->components)
-				if (typeid(T).name() == typeid(*component).name())
-					return (T*)component;
+			for (SharedPointer<Component>* component : this->components)
+				if (typeid(T).name() == typeid(*component->Pointer()).name())
+					return (SharedPointer<T>*)component;
 		}
-
-		OpenObject(std::string name);
-		OpenObject();
 
 		void Update(float delta);
 		void Destroy();
@@ -78,8 +127,19 @@ namespace Engine
 	class Component 
 	{
 	public:
-		OpenObject* openObject;
-		Transform* transform;
+		SharedPointer<OpenObject>* openObjectPtr;
+		OpenObject* openObject() {
+			if (openObjectPtr == nullptr)
+				return nullptr;
+			return openObjectPtr->Pointer();
+		}
+
+		SharedPointer<Transform>* transformPtr;
+		Transform* transform() {
+			if (transformPtr == nullptr)
+				return nullptr;
+			return transformPtr->Pointer();
+		}
 		
 		void DestroyInternal();
 		virtual void Awake() {};
@@ -98,14 +158,15 @@ namespace Engine
 	};
 
 	template<class T>
-	T* CreateComponent(OpenObject* object)
+	SharedPointer<T>* CreateComponent(SharedPointer<OpenObject>* object)
 	{
 		T* component = new T();
-		component->openObject = object;
-		component->transform = object->transform;
-		object->AddComponent(component);
+		component->openObjectPtr = object;
+		component->transformPtr = object->Pointer()->transformPtr;
 		component->Awake();
 
-		return component;
+		SharedPointer<T>* sharedPointer = new SharedPointer<T>(component);
+		object->Pointer()->AddComponent((SharedPointer<Component>*)sharedPointer);
+		return sharedPointer;
 	}
 }

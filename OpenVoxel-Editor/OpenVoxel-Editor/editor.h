@@ -36,21 +36,21 @@ namespace Editor
 	class ObjectView : public EditorWindow
 	{
 	private:
-		Engine::OpenObject* oldSelectedObject;
+		Engine::SharedPointer<Engine::OpenObject>* oldSelectedObject;
 		int oldSelectedObjectIndex;
 
-		Engine::OpenObject* selectedObject;
+		Engine::SharedPointer<Engine::OpenObject>* selectedObject;
 		int selectedObjectIndex;
 
 		std::map<int, bool> objectDropdownsOpen;
 
 		bool RegisterTreeNode(int objectIndex, bool hasChildren, const char* objectName, bool& wasAlreadyOpen);
-		void PopulateChildren(int& index, bool& isRoot, Engine::OpenObject** targetObject, int& childDisplacement);
-		void ShouldSelectNode(int objectIndex, Engine::OpenObject* object, bool wasJustOpen, bool isOpen);
+		void PopulateChildren(int& index, bool& isRoot, Engine::SharedPointer<Engine::OpenObject>** targetObject, int& childDisplacement);
+		void ShouldSelectNode(int objectIndex, Engine::SharedPointer<Engine::OpenObject>* object, bool wasJustOpen, bool isOpen);
 	public:
 		void Initialize() override;
 		void Render() override;
-		Engine::OpenObject* GetTargetedObject();
+		Engine::SharedPointer<Engine::OpenObject>* GetTargetedObject();
 	};
 
 	class ObjectInspector : public EditorWindow

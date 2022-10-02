@@ -27,7 +27,7 @@ namespace Rendering
 	class PlayerController : public Engine::Component
 	{
 	private:
-		Camera* childCamera;
+		Engine::SharedPointer<Camera>* childCamera;
 	public:
 		void Awake() override;
 		void Update(float delta) override;
