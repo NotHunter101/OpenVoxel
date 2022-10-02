@@ -22,6 +22,8 @@ namespace Game
     GLFWwindow* window;
     Editor::EditorApplication* application;
 
+    Engine::SharedPointer<Voxel::VoxelWorld>* voxelWorld;
+
     void InitializeGameAndWorld()
     {
         float width = 1200.0f;
@@ -66,7 +68,7 @@ namespace Game
         Engine::SetActiveScene(new Engine::OpenScene());
 
         Engine::SharedPointer<Engine::OpenObject>* worldObject = Engine::SceneInstance->AddObject("VoxelWorld");
-        Engine::SharedPointer<Voxel::VoxelWorld>* voxelWorld = Engine::CreateComponent<Voxel::VoxelWorld>(worldObject);
+        voxelWorld = Engine::CreateComponent<Voxel::VoxelWorld>(worldObject);
 
         glm::vec3 defaultOffset = glm::vec3(0.0f, 0.0f, -250.0f);
 
@@ -129,6 +131,9 @@ namespace Game
             float time = TimeSinceStart();
             deltaWriteTimer += delta;
             deltaWriteCounter++;
+
+            voxelWorld->Pointer()->openObject()->GetChild(0)
+                ->Pointer()->transform()->eulerRotation = glm::vec3(45.0f, sinf(time) * 180.0f, 0.0f);
 
             if (deltaWriteTimer >= 1.0f)
             {
