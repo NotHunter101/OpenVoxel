@@ -53,9 +53,9 @@ namespace Editor
 	void ObjectView::Initialize()
 	{
 		this->selectedObject = nullptr;
-		this->selectedObjectIndex = 0;
+		this->selectedObjectIndex = -1;
 		this->oldSelectedObject = nullptr;
-		this->oldSelectedObjectIndex = 0;
+		this->oldSelectedObjectIndex = -1;
 		this->objectDropdownsOpen = std::map<int, bool>();
 	}
 
@@ -162,7 +162,7 @@ namespace Editor
 		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton(0))) 
 		{
 			this->selectedObject = nullptr;
-			this->selectedObjectIndex = 0;
+			this->selectedObjectIndex = -1;
 		}
 
 		bool isRoot = true;
