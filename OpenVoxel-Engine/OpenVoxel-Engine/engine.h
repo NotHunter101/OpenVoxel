@@ -20,12 +20,12 @@ namespace Engine
 	void SetActiveScene(OpenScene* scene);
 
 	template <class T>
-	class SharedPointer 
+	class SharedPtr 
 	{
 	private:
 		T* pointer;
 	public:
-		SharedPointer(T* pointer) 
+		SharedPtr(T* pointer) 
 		{
 			this->pointer = pointer;
 		}
@@ -47,7 +47,7 @@ namespace Engine
 			return pointer != nullptr;
 		}
 
-		T* Pointer() const
+		T* Ptr() const
 		{
 			if (pointer == nullptr) {
 				std::cout << "ERROR: Pointer is being accessed when the underlying memory has been deleted (Are you using a destroyed object?)" << std::endl;
@@ -61,11 +61,11 @@ namespace Engine
 	class OpenScene
 	{
 	private:
-		std::vector<SharedPointer<OpenObject>*> objects;
+		std::vector<SharedPtr<OpenObject>*> objects;
 	public:
-		SharedPointer<OpenObject>* AddObject(std::string name);
+		SharedPtr<OpenObject>* AddObject(std::string name);
 		void DeleteObject(OpenObject* object);
-		SharedPointer<OpenObject>* GetObject(int objectIndex);
+		SharedPtr<OpenObject>* GetObject(int objectIndex);
 		int GetObjectCount();
 
 		OpenScene();
@@ -77,13 +77,13 @@ namespace Engine
 	class OpenObject 
 	{
 	private:
-		std::vector<SharedPointer<Component>*> components;
-		std::vector<SharedPointer<OpenObject>*> children;
-		SharedPointer<OpenObject>* parentPtr;
+		std::vector<SharedPtr<Component>*> components;
+		std::vector<SharedPtr<OpenObject>*> children;
+		SharedPtr<OpenObject>* parentPtr;
 		OpenObject* parent() {
 			if (parentPtr == nullptr)
 				return nullptr;
-			return parentPtr->Pointer();
+			return parentPtr->Ptr();
 		}
 		bool destroyed;
 
@@ -91,33 +91,33 @@ namespace Engine
 		OpenObject() {}
 		void Initialize();
 
-		SharedPointer<Transform>* transformPtr;
+		SharedPtr<Transform>* transformPtr;
 		Transform* transform() {
 			if (transformPtr == nullptr)
 				return nullptr;
-			return transformPtr->Pointer();
+			return transformPtr->Ptr();
 		}
 
 		std::string name;
 		int sceneIndex;
 
-		static void SetParent(SharedPointer<OpenObject>* child, SharedPointer<OpenObject>* parent);
-		SharedPointer<OpenObject>* GetParent();
-		SharedPointer<OpenObject>* GetChild(int index);
+		static void SetParent(SharedPtr<OpenObject>* child, SharedPtr<OpenObject>* parent);
+		SharedPtr<OpenObject>* GetParent();
+		SharedPtr<OpenObject>* GetChild(int index);
 		int GetChildCount();
 
-		void AddComponent(SharedPointer<Component>* component);
+		void AddComponent(SharedPtr<Component>* component);
 		void RemoveComponentInternal(Component* component);
 		void RemoveComponent(Component* component);
-		SharedPointer<Component>* GetComponent(int componentIndex);
+		SharedPtr<Component>* GetComponent(int componentIndex);
 		int GetComponentCount();
 
 		template <class T>
-		SharedPointer<T>* GetComponent()
+		SharedPtr<T>* GetComponent()
 		{
-			for (SharedPointer<Component>* component : this->components)
-				if (typeid(T).name() == typeid(*component->Pointer()).name())
-					return (SharedPointer<T>*)component;
+			for (SharedPtr<Component>* component : this->components)
+				if (typeid(T).name() == typeid(*component->Ptr()).name())
+					return (SharedPtr<T>*)component;
 		}
 
 		void Update(float delta);
@@ -127,18 +127,18 @@ namespace Engine
 	class Component 
 	{
 	public:
-		SharedPointer<OpenObject>* openObjectPtr;
+		SharedPtr<OpenObject>* openObjectPtr;
 		OpenObject* openObject() {
 			if (openObjectPtr == nullptr)
 				return nullptr;
-			return openObjectPtr->Pointer();
+			return openObjectPtr->Ptr();
 		}
 
-		SharedPointer<Transform>* transformPtr;
+		SharedPtr<Transform>* transformPtr;
 		Transform* transform() {
 			if (transformPtr == nullptr)
 				return nullptr;
-			return transformPtr->Pointer();
+			return transformPtr->Ptr();
 		}
 		
 		void DestroyInternal();
@@ -158,15 +158,15 @@ namespace Engine
 	};
 
 	template<class T>
-	SharedPointer<T>* CreateComponent(SharedPointer<OpenObject>* object)
+	SharedPtr<T>* CreateComponent(SharedPtr<OpenObject>* object)
 	{
 		T* component = new T();
 		component->openObjectPtr = object;
-		component->transformPtr = object->Pointer()->transformPtr;
+		component->transformPtr = object->Ptr()->transformPtr;
 		component->Awake();
 
-		SharedPointer<T>* sharedPointer = new SharedPointer<T>(component);
-		object->Pointer()->AddComponent((SharedPointer<Component>*)sharedPointer);
-		return sharedPointer;
+		SharedPtr<T>* sharedPtr = new SharedPtr<T>(component);
+		object->Ptr()->AddComponent((SharedPtr<Component>*)sharedPtr);
+		return sharedPtr;
 	}
 }

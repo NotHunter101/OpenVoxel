@@ -33,16 +33,16 @@ namespace CLI
 	public ref class ClassWrapper
 	{
 	internal:
-		Engine::SharedPointer<T>* generalPointer;
+		Engine::SharedPtr<T>* generalPointer;
 		bool pointerExternallyManaged;
 
-		property Engine::SharedPointer<T>* instance
+		property Engine::SharedPtr<T>* instance
 		{
-			Engine::SharedPointer<T>* get()
+			Engine::SharedPtr<T>* get()
 			{
-				return (Engine::SharedPointer<T>*)generalPointer;
+				return (Engine::SharedPtr<T>*)generalPointer;
 			}
-			void set(Engine::SharedPointer<T>* pointer)
+			void set(Engine::SharedPtr<T>* pointer)
 			{
 				generalPointer = pointer;
 			}
@@ -52,10 +52,10 @@ namespace CLI
 		ClassWrapper() 
 		{
 			pointerExternallyManaged = false;
-			generalPointer = new Engine::SharedPointer<T>(new T());
+			generalPointer = new Engine::SharedPtr<T>(new T());
 		}
 
-		ClassWrapper(Engine::SharedPointer<T>* instance)
+		ClassWrapper(Engine::SharedPtr<T>* instance)
 		{
 			pointerExternallyManaged = true;
 			this->generalPointer = instance;
@@ -146,11 +146,11 @@ namespace CLI
 		public:
 			Vector3^ get()
 			{
-				return %Vector3::FromGlm(instance->Pointer()->position);
+				return %Vector3::FromGlm(instance->Ptr()->position);
 			}
 			void set(Vector3^ value)
 			{
-				instance->Pointer()->position = value->ToGlm();
+				instance->Ptr()->position = value->ToGlm();
 			}
 		}
 
@@ -159,11 +159,11 @@ namespace CLI
 		public:
 			Vector3^ get()
 			{
-				return %Vector3::FromGlm(instance->Pointer()->scale);
+				return %Vector3::FromGlm(instance->Ptr()->scale);
 			}
 			void set(Vector3^ value)
 			{
-				instance->Pointer()->scale = value->ToGlm();
+				instance->Ptr()->scale = value->ToGlm();
 			}
 		}
 
@@ -172,11 +172,11 @@ namespace CLI
 		public:
 			Vector3^ get()
 			{
-				return %Vector3::FromGlm(instance->Pointer()->eulerRotation);
+				return %Vector3::FromGlm(instance->Ptr()->eulerRotation);
 			}
 			void set(Vector3^ value)
 			{
-				instance->Pointer()->eulerRotation = value->ToGlm();
+				instance->Ptr()->eulerRotation = value->ToGlm();
 			}
 		}
 	};

@@ -45,14 +45,14 @@ namespace CLI
 		: ClassWrapper(Engine::SceneInstance->AddObject(stringToStdString(name)))
 	{
 		Transform^ transform = gcnew Transform();
-		transform->instance = this->instance->Pointer()->transformPtr;
+		transform->instance = this->instance->Ptr()->transformPtr;
 		transform->pointerExternallyManaged = true;
 		this->transform = transform;
 	}
 
 	void OpenObject::AddComponent(Component^ component)
 	{
-		this->instance->Pointer()->AddComponent((Engine::SharedPointer<Engine::Component>*)component->instance);
+		this->instance->Ptr()->AddComponent((Engine::SharedPtr<Engine::Component>*)component->instance);
 	}
 
 	ManagedComponent::ManagedComponent(CLI::Component^ managedComponent)

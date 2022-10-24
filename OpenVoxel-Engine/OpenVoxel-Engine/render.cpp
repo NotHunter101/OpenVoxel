@@ -9,7 +9,7 @@
 
 namespace Rendering 
 {
-    Engine::SharedPointer<Voxel::VoxelWorld>* voxelWorld;
+    Engine::SharedPtr<Voxel::VoxelWorld>* voxelWorld;
     ShaderProgram* shaderPrograms;
 
     unsigned int* VAOs;
@@ -17,23 +17,23 @@ namespace Rendering
     unsigned int* EBOs;
     int* visibleVoxelCount;
 
-    Engine::SharedPointer<Camera>* targetCamera;
+    Engine::SharedPtr<Camera>* targetCamera;
 
-    int InitRenderer(Engine::SharedPointer<Voxel::VoxelWorld>* world, int width, int height, std::string shaderPath)
+    int InitRenderer(Engine::SharedPtr<Voxel::VoxelWorld>* world, int width, int height, std::string shaderPath)
     {
         voxelWorld = world;
 
-        Engine::SharedPointer<Engine::OpenObject>* playerObject = Engine::SceneInstance->AddObject("Player");
-        Engine::SharedPointer<Engine::OpenObject>* cameraObject = Engine::SceneInstance->AddObject("Camera");
+        Engine::SharedPtr<Engine::OpenObject>* playerObject = Engine::SceneInstance->AddObject("Player");
+        Engine::SharedPtr<Engine::OpenObject>* cameraObject = Engine::SceneInstance->AddObject("Camera");
 
         targetCamera = Engine::CreateComponent<Camera>(cameraObject);
-        targetCamera->Pointer()->openObject()->transform()->position = glm::vec3(0.0f, 0.0f, 4.0f);
+        targetCamera->Ptr()->openObject()->transform()->position = glm::vec3(0.0f, 0.0f, 4.0f);
 
         Engine::OpenObject::SetParent(cameraObject, playerObject);
         Engine::CreateComponent<Rendering::PlayerController>(playerObject);
 
-        targetCamera->Pointer()->UpdateProjectionMatrix(60.0f, 0.1f, 750.0f, width, height);
-        targetCamera->Pointer()->UpdateViewMatrix();
+        targetCamera->Ptr()->UpdateProjectionMatrix(60.0f, 0.1f, 750.0f, width, height);
+        targetCamera->Ptr()->UpdateViewMatrix();
 
         Shader vertexShader = Shader("Vertex", GL_VERTEX_SHADER, shaderPath + "vertex.glsl");
         Shader fragmentShader = Shader("Fragment", GL_FRAGMENT_SHADER, shaderPath + "fragment.glsl");
@@ -43,14 +43,14 @@ namespace Rendering
             return -1;
         }
 
-        shaderPrograms = new ShaderProgram[voxelWorld->Pointer()->meshCount];
-        visibleVoxelCount = new int[voxelWorld->Pointer()->meshCount];
+        shaderPrograms = new ShaderProgram[voxelWorld->Ptr()->meshCount];
+        visibleVoxelCount = new int[voxelWorld->Ptr()->meshCount];
 
-        VAOs = new unsigned int[voxelWorld->Pointer()->meshCount];
-        VBOs = new unsigned int[voxelWorld->Pointer()->meshCount];
-        EBOs = new unsigned int[voxelWorld->Pointer()->meshCount];
+        VAOs = new unsigned int[voxelWorld->Ptr()->meshCount];
+        VBOs = new unsigned int[voxelWorld->Ptr()->meshCount];
+        EBOs = new unsigned int[voxelWorld->Ptr()->meshCount];
 
-        for (int i = 0; i < voxelWorld->Pointer()->meshCount; i++)
+        for (int i = 0; i < voxelWorld->Ptr()->meshCount; i++)
         {
             ShaderProgram shaderProgram = ShaderProgram(&vertexShader, &fragmentShader, &geometryShader);
             if (!shaderProgram.linked) {
@@ -59,7 +59,7 @@ namespace Rendering
 
             shaderProgram.UseProgram();
             SetFaceRotationMatrices(shaderProgram);
-            SetVoxelBufferDimensions(voxelWorld->Pointer()->meshes[i]->Pointer(), shaderProgram);
+            SetVoxelBufferDimensions(voxelWorld->Ptr()->meshes[i]->Ptr(), shaderProgram);
             glUseProgram(0);
 
             shaderPrograms[i] = shaderProgram;
@@ -84,15 +84,15 @@ namespace Rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (int i = 0; i < voxelWorld->Pointer()->meshCount; i++)
+        for (int i = 0; i < voxelWorld->Ptr()->meshCount; i++)
         {
-            Engine::SharedPointer<Voxel::VoxelMesh>* mesh = voxelWorld->Pointer()->meshes[i];
+            Engine::SharedPtr<Voxel::VoxelMesh>* mesh = voxelWorld->Ptr()->meshes[i];
             shaderPrograms[i].UseProgram();
-            SetMVP(mesh->Pointer(), shaderPrograms[i]);
+            SetMVP(mesh->Ptr(), shaderPrograms[i]);
 
             glBindVertexArray(VAOs[i]);
 
-            if (mesh->Pointer()->bufferDirty) 
+            if (mesh->Ptr()->bufferDirty) 
             {
                 SetVoxels(i);
                 SetVisibleVoxels(i);
@@ -107,12 +107,12 @@ namespace Rendering
 
     void ChangeWindowSize(int width, int height)
     {
-        targetCamera->Pointer()->UpdateProjectionMatrix(60.0f, 0.1f, 500.0f, width, height);
+        targetCamera->Ptr()->UpdateProjectionMatrix(60.0f, 0.1f, 500.0f, width, height);
     }
 
     void SetVoxels(int meshIndex) 
     {
-        uint8_t* voxels = voxelWorld->Pointer()->meshes[meshIndex]->Pointer()->voxels;
+        uint8_t* voxels = voxelWorld->Ptr()->meshes[meshIndex]->Ptr()->voxels;
 
         glBindBuffer(GL_ARRAY_BUFFER, VBOs[meshIndex]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(voxels), voxels, GL_DYNAMIC_DRAW);
@@ -120,7 +120,7 @@ namespace Rendering
 
     void SetVisibleVoxels(int meshIndex) 
     {
-        std::vector<unsigned int>* visibleVoxels = voxelWorld->Pointer()->meshes[meshIndex]->Pointer()->GetVisibleVoxels();
+        std::vector<unsigned int>* visibleVoxels = voxelWorld->Ptr()->meshes[meshIndex]->Ptr()->GetVisibleVoxels();
         visibleVoxelCount[meshIndex] = visibleVoxels->size();
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[meshIndex]);
@@ -131,7 +131,7 @@ namespace Rendering
 
     void SetMVP(Voxel::VoxelMesh* mesh, ShaderProgram program) 
     {
-        program.SetMat4x4("MVP_MATRIX", targetCamera->Pointer()->projectionMatrix * targetCamera->Pointer()->viewMatrix * mesh->GetModelMatrix());
+        program.SetMat4x4("MVP_MATRIX", targetCamera->Ptr()->projectionMatrix * targetCamera->Ptr()->viewMatrix * mesh->GetModelMatrix());
     }
 
     void SetFaceRotationMatrices(ShaderProgram program)

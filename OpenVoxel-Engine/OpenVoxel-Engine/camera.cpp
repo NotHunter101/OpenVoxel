@@ -29,13 +29,13 @@ namespace Rendering
 
 	void PlayerController::Awake()
 	{
-		this->childCamera = openObject()->GetChild(0)->Pointer()->GetComponent<Camera>();
+		this->childCamera = openObject()->GetChild(0)->Ptr()->GetComponent<Camera>();
 	}
 
 	void PlayerController::Update(float delta)
 	{
-		glm::vec3 cameraFoward = this->childCamera->Pointer()->rotateMatrix 
-			* glm::vec4(this->childCamera->Pointer()->transform()->position, 1.0f);
+		glm::vec3 cameraFoward = this->childCamera->Ptr()->rotateMatrix 
+			* glm::vec4(this->childCamera->Ptr()->transform()->position, 1.0f);
 
 		//if ()
 

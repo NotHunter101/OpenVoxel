@@ -22,7 +22,7 @@ namespace Game
     GLFWwindow* window;
     Editor::EditorApplication* application;
 
-    Engine::SharedPointer<Voxel::VoxelWorld>* voxelWorld;
+    Engine::SharedPtr<Voxel::VoxelWorld>* voxelWorld;
 
     void InitializeGameAndWorld()
     {
@@ -67,25 +67,25 @@ namespace Game
 
         Engine::SetActiveScene(new Engine::OpenScene());
 
-        Engine::SharedPointer<Engine::OpenObject>* worldObject = Engine::SceneInstance->AddObject("VoxelWorld");
+        Engine::SharedPtr<Engine::OpenObject>* worldObject = Engine::SceneInstance->AddObject("VoxelWorld");
         voxelWorld = Engine::CreateComponent<Voxel::VoxelWorld>(worldObject);
 
         glm::vec3 defaultOffset = glm::vec3(0.0f, 0.0f, -250.0f);
 
-        Engine::SharedPointer<Engine::OpenObject>* meshObject = Engine::SceneInstance->AddObject("VoxelMesh");
+        Engine::SharedPtr<Engine::OpenObject>* meshObject = Engine::SceneInstance->AddObject("VoxelMesh");
         Engine::OpenObject::SetParent(meshObject, worldObject);
 
-        meshObject->Pointer()->transform()->position = defaultOffset;
-        meshObject->Pointer()->transform()->scale = glm::vec3(1.0f);
+        meshObject->Ptr()->transform()->position = defaultOffset;
+        meshObject->Ptr()->transform()->scale = glm::vec3(1.0f);
 
-        Engine::SharedPointer<Voxel::VoxelMesh>* voxelMesh = Engine::CreateComponent<Voxel::VoxelMesh>(meshObject);
-        voxelMesh->Pointer()->InitalizeBuffer(glm::uvec3(150, 150, 150));
-        voxelWorld->Pointer()->AddMesh(voxelMesh);
+        Engine::SharedPtr<Voxel::VoxelMesh>* voxelMesh = Engine::CreateComponent<Voxel::VoxelMesh>(meshObject);
+        voxelMesh->Ptr()->InitalizeBuffer(glm::uvec3(150, 150, 150));
+        voxelWorld->Ptr()->AddMesh(voxelMesh);
 
         for (int x2 = 0; x2 < 150; x2++) {
             for (int y2 = 0; y2 < 150; y2++) {
                 for (int z2 = 0; z2 < 150; z2++) {
-                    voxelMesh->Pointer()->voxels[voxelMesh->Pointer()->PositionToPackedIndex(x2, y2, z2)] = 1;
+                    voxelMesh->Ptr()->voxels[voxelMesh->Ptr()->PositionToPackedIndex(x2, y2, z2)] = 1;
                 }
             }
         }
@@ -132,8 +132,8 @@ namespace Game
             deltaWriteTimer += delta;
             deltaWriteCounter++;
 
-            voxelWorld->Pointer()->openObject()->GetChild(0)
-                ->Pointer()->transform()->eulerRotation = glm::vec3(45.0f, sinf(time) * 180.0f, 0.0f);
+            voxelWorld->Ptr()->openObject()->GetChild(0)
+                ->Ptr()->transform()->eulerRotation = glm::vec3(45.0f, sinf(time) * 180.0f, 0.0f);
 
             if (deltaWriteTimer >= 1.0f)
             {

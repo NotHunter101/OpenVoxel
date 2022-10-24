@@ -5,7 +5,7 @@
 
 namespace Rendering 
 {
-	int InitRenderer(Engine::SharedPointer<Voxel::VoxelWorld>* world, int width, int height, std::string shaderPath);
+	int InitRenderer(Engine::SharedPtr<Voxel::VoxelWorld>* world, int width, int height, std::string shaderPath);
 	void RenderFrame();
 	void ChangeWindowSize(int width, int height);
 	void SetVoxels(int meshIndex);

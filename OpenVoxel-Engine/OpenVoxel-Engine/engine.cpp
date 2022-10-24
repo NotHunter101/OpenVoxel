@@ -13,14 +13,14 @@ namespace Engine
 		SceneInstance = scene;
 	}
 
-	SharedPointer<OpenObject>* OpenScene::AddObject(std::string name)
+	SharedPtr<OpenObject>* OpenScene::AddObject(std::string name)
 	{
 		OpenObject* object = new OpenObject();
 		object->name = name;
 		object->Initialize();
 		object->sceneIndex = this->objects.size();
 
-		SharedPointer<OpenObject>* objectPtr = new SharedPointer<OpenObject>(object);
+		SharedPtr<OpenObject>* objectPtr = new SharedPtr<OpenObject>(object);
 		object->transformPtr = CreateComponent<Transform>(objectPtr);
 		this->objects.push_back(objectPtr);
 		return objectPtr;
@@ -30,15 +30,15 @@ namespace Engine
 	{
 		int sceneIndex = (*object).sceneIndex;
 		for (int i = sceneIndex + 1; i < this->objects.size(); i++) {
-			this->objects[i]->Pointer()->sceneIndex = i - 1;
+			this->objects[i]->Ptr()->sceneIndex = i - 1;
 		}
 
-		this->objects[sceneIndex]->Pointer()->Destroy();
+		this->objects[sceneIndex]->Ptr()->Destroy();
 		this->objects[sceneIndex]->Delete();
 		this->objects.erase(this->objects.begin() + sceneIndex);
 	}
 
-	SharedPointer<OpenObject>* OpenScene::GetObject(int objectIndex)
+	SharedPtr<OpenObject>* OpenScene::GetObject(int objectIndex)
 	{
 		return this->objects[objectIndex];
 	}
@@ -50,20 +50,20 @@ namespace Engine
 
 	OpenScene::OpenScene()
 	{
-		this->objects = std::vector<SharedPointer<OpenObject>*>();
+		this->objects = std::vector<SharedPtr<OpenObject>*>();
 	}
 
 	void OpenScene::Update(float delta)
 	{
 		for (int i = 0; i < this->objects.size(); i++) {
-			this->objects[i]->Pointer()->Update(delta);
+			this->objects[i]->Ptr()->Update(delta);
 		}
 	}
 
 	void OpenScene::Destroy()
 	{
 		for (int i = 0; i < this->objects.size(); i++) {
-			this->objects[i]->Pointer()->Destroy();
+			this->objects[i]->Ptr()->Destroy();
 		}
 
 		delete SceneInstance;
@@ -72,43 +72,43 @@ namespace Engine
 
 	void OpenObject::Initialize() 
 	{
-		this->children = std::vector<SharedPointer<OpenObject>*>();
-		this->components = std::vector<SharedPointer<Component>*>();
+		this->children = std::vector<SharedPtr<OpenObject>*>();
+		this->components = std::vector<SharedPtr<Component>*>();
 		this->destroyed = false;
 		this->parentPtr = nullptr;
 	}
 
-	void OpenObject::SetParent(SharedPointer<OpenObject>* child, SharedPointer<OpenObject>* parent)
+	void OpenObject::SetParent(SharedPtr<OpenObject>* child, SharedPtr<OpenObject>* parent)
 	{
-		if (child->Pointer()->parent() != nullptr) {
+		if (child->Ptr()->parent() != nullptr) {
 			int index = 0;
-			for (index = 0; index < child->Pointer()->parent()->GetChildCount(); index++)
-				if (child->Pointer()->parent()->GetChild(index) == child)
+			for (index = 0; index < child->Ptr()->parent()->GetChildCount(); index++)
+				if (child->Ptr()->parent()->GetChild(index) == child)
 					break;
 
-			std::vector<SharedPointer<OpenObject>*>* children = &child->Pointer()->parent()->children;
+			std::vector<SharedPtr<OpenObject>*>* children = &child->Ptr()->parent()->children;
 			children->erase(children->begin() + index);
 		}
 
 		if (parent != nullptr && !parent->PointerExists())
 		{
-			std::cout << "WARNING: Do not pass 'new SharedPointer<OpenObject>(nullptr)' as parent; pass 'nullptr' instead.";
+			std::cout << "WARNING: Do not pass 'new SharedPtr<OpenObject>(nullptr)' as parent; pass 'nullptr' instead.";
 			delete parent;
 			parent = nullptr;
 		}
 
-		child->Pointer()->parentPtr = parent;
+		child->Ptr()->parentPtr = parent;
 
 		if (parent != nullptr)
-			parent->Pointer()->children.push_back(child);
+			parent->Ptr()->children.push_back(child);
 	}
 
-	SharedPointer<OpenObject>* OpenObject::GetParent()
+	SharedPtr<OpenObject>* OpenObject::GetParent()
 	{
 		return this->parentPtr;
 	}
 
-	SharedPointer<OpenObject>* OpenObject::GetChild(int index)
+	SharedPtr<OpenObject>* OpenObject::GetChild(int index)
 	{
 		return this->children[index];
 	}
@@ -118,7 +118,7 @@ namespace Engine
 		return this->children.size();
 	}
 
-	void OpenObject::AddComponent(SharedPointer<Component>* component)
+	void OpenObject::AddComponent(SharedPtr<Component>* component)
 	{
 		this->components.push_back(component);
 	}
@@ -127,7 +127,7 @@ namespace Engine
 	{
 		int index = 0;
 		for (index = 0; index < this->components.size(); index++) {
-			if (component == this->components[index]->Pointer()) {
+			if (component == this->components[index]->Ptr()) {
 				break;
 			}
 
@@ -137,7 +137,7 @@ namespace Engine
 			}
 		}
 
-		this->components[index]->Pointer()->Destroy();
+		this->components[index]->Ptr()->Destroy();
 		this->components[index]->Delete();
 		this->components.erase(this->components.begin() + index);
 	}
@@ -153,7 +153,7 @@ namespace Engine
 		RemoveComponentInternal(component);
 	}
 
-	SharedPointer<Component>* OpenObject::GetComponent(int componentIndex)
+	SharedPtr<Component>* OpenObject::GetComponent(int componentIndex)
 	{
 		return this->components[componentIndex];
 	}
@@ -167,7 +167,7 @@ namespace Engine
 	{
 		for (int i = 0; i < this->GetComponentCount(); i++)
 		{
-			this->GetComponent(i)->Pointer()->Update(delta);
+			this->GetComponent(i)->Ptr()->Update(delta);
 		}
 	}
 
@@ -178,8 +178,8 @@ namespace Engine
 
 		int initialCompCount = this->components.size();
 		for (int i = 0; i < initialCompCount; i++) {
-			SharedPointer<Component>* comp = this->GetComponent(0);
-			comp->Pointer()->DestroyInternal();
+			SharedPtr<Component>* comp = this->GetComponent(0);
+			comp->Ptr()->DestroyInternal();
 		}
 
 		this->destroyed = true;

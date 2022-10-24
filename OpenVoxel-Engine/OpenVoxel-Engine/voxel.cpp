@@ -122,11 +122,11 @@ namespace Voxel
 	void VoxelWorld::Awake()
 	{
 		this->lightmap = new VoxelLightmap();
-		this->meshes = std::vector<Engine::SharedPointer<VoxelMesh>*>();
+		this->meshes = std::vector<Engine::SharedPtr<VoxelMesh>*>();
 		this->meshCount = 0;
 	}
 
-	void VoxelWorld::AddMesh(Engine::SharedPointer<VoxelMesh>* mesh)
+	void VoxelWorld::AddMesh(Engine::SharedPtr<VoxelMesh>* mesh)
 	{
 		this->meshes.push_back(mesh);
 		this->meshCount++;
