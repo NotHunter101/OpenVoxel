@@ -9,5 +9,5 @@ namespace Game
 	void StartGameLoop();
 	float TimeSinceStart();
 	void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
-	void ProcessInput(GLFWwindow* window);
+	void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods);
 }

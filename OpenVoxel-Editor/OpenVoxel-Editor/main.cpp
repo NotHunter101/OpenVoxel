@@ -4,6 +4,7 @@
 #include "voxel.h"
 #include "engine.h"
 #include "editor.h"
+#include "input.h"
 
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
@@ -24,6 +25,8 @@ namespace Game
 
     Engine::SharedPtr<Voxel::VoxelWorld>* voxelWorld;
 
+    ImGuiIO* imguiIO;
+
     void InitializeGameAndWorld()
     {
         float width = 1200.0f;
@@ -35,6 +38,7 @@ namespace Game
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         window = glfwCreateWindow(width, height, "LearnOpenGL", NULL, NULL);
+        Input::window = window;
         if (window == NULL)
         {
             std::cout << "Failed to create GLFW window" << std::endl;
@@ -58,6 +62,7 @@ namespace Game
         glEnable(GL_CULL_FACE);
 
         glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+        glfwSetKeyCallback(window, ProcessInput);
 
         application = new Editor::EditorApplication();
         Editor::ObjectView* objectView = Editor::CreateWindow<Editor::ObjectView>();
@@ -108,8 +113,8 @@ namespace Game
         int deltaWriteCounter = 0.0f;
 
         ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable some options
+        imguiIO = &ImGui::GetIO();
+        imguiIO->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable some options
 
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init(NULL);
@@ -119,8 +124,7 @@ namespace Game
         while (!glfwWindowShouldClose(window))
         {
             glfwPollEvents();
-            ProcessInput(window);
-
+            
             ImGui_ImplGlfw_NewFrame();
             ImGui_ImplOpenGL3_NewFrame();
             ImGui::NewFrame();
@@ -132,8 +136,8 @@ namespace Game
             deltaWriteTimer += delta;
             deltaWriteCounter++;
 
-            voxelWorld->Ptr()->openObject()->GetChild(0)
-                ->Ptr()->transform()->eulerRotation = glm::vec3(45.0f, sinf(time) * 180.0f, 0.0f);
+            //voxelWorld->Ptr()->openObject()->GetChild(0)
+            //    ->Ptr()->transform()->eulerRotation = glm::vec3(45.0f, sinf(time) * 180.0f, 0.0f);
 
             if (deltaWriteTimer >= 1.0f)
             {
@@ -179,12 +183,13 @@ namespace Game
             Rendering::ChangeWindowSize(width, height);
     }
 
-    void ProcessInput(GLFWwindow* window)
+    void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
-        //if (io.WantCaptureKeyboard)
-        //    return;
+        if (imguiIO->WantCaptureKeyboard)
+            return;
 
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        Input::ProcessInput(window, key, action);
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
     }
 }

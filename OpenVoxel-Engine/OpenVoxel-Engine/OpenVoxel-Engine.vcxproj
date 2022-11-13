@@ -149,6 +149,7 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="input.cpp" />
     <ClCompile Include="render.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="voxel.cpp" />
@@ -156,6 +157,7 @@
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="engine.h" />
+    <ClInclude Include="input.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="voxel.h" />
