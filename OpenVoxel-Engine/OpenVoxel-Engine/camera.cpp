@@ -43,6 +43,11 @@ namespace Rendering
 		glm::vec3 cameraRight = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) * rotationMatrix;
 
 		float moveSpeed = 20.0f;
+
+		if (Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT)) {
+			moveSpeed = 200.0f;
+		}
+
 		float deltaMoveSpeed = moveSpeed * delta;
 
 		float rotateSpeed = 1.0f;

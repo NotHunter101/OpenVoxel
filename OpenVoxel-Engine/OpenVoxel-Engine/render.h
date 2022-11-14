@@ -10,7 +10,7 @@ namespace Rendering
 	void ChangeWindowSize(int width, int height);
 	void SetVoxels(int meshIndex);
 	void SetVisibleVoxels(int meshIndex);
-	void SetMVP(Voxel::VoxelMesh* mesh, ShaderProgram program);
-	void SetFaceRotationMatrices(ShaderProgram program);
-	void SetVoxelBufferDimensions(Voxel::VoxelMesh* mesh, ShaderProgram program);
+	void SetMVP(Voxel::VoxelMesh* mesh, ShaderProgram* program);
+	void SetFaceRotationMatrices(ShaderProgram* program);
+	void SetVoxelBufferDimensions(Voxel::VoxelMesh* mesh, ShaderProgram* program);
 }
