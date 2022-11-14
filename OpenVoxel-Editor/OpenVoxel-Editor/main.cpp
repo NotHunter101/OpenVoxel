@@ -163,6 +163,7 @@ namespace Game
 
         application->Destroy();
         Engine::SceneInstance->Destroy();
+        Rendering::DestroyRenderer();
 
         glfwDestroyWindow(window);
         glfwTerminate();

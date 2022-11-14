@@ -10,8 +10,8 @@
 namespace Rendering 
 {
     Engine::SharedPtr<Voxel::VoxelWorld>* voxelWorld;
-    ShaderProgram** shaderPrograms;
 
+    ShaderProgram* shaderPrograms;
     unsigned int* VAOs;
     unsigned int* VBOs;
     unsigned int* EBOs;
@@ -45,7 +45,7 @@ namespace Rendering
 
         int meshCount = voxelWorld->Ptr()->meshCount;
 
-        shaderPrograms = new ShaderProgram*[meshCount];
+        shaderPrograms = new ShaderProgram[meshCount];
         visibleVoxelCount = new int[meshCount];
 
         VAOs = new unsigned int[meshCount];
@@ -54,12 +54,12 @@ namespace Rendering
 
         for (int i = 0; i < meshCount; i++)
         {
-            ShaderProgram* shaderProgram = new ShaderProgram(&vertexShader, &fragmentShader, &geometryShader);
-            if (!shaderProgram->linked) {
+            ShaderProgram shaderProgram = ShaderProgram(&vertexShader, &fragmentShader, &geometryShader);
+            if (!shaderProgram.linked) {
                 return -1;
             }
 
-            shaderProgram->UseProgram();
+            shaderProgram.UseProgram();
             SetFaceRotationMatrices(shaderProgram);
             SetVoxelBufferDimensions(voxelWorld->Ptr()->meshes[i]->Ptr(), shaderProgram);
             glUseProgram(0);
@@ -91,7 +91,7 @@ namespace Rendering
         for (int i = 0; i < voxelWorld->Ptr()->meshCount; i++)
         {
             Engine::SharedPtr<Voxel::VoxelMesh>* mesh = voxelWorld->Ptr()->meshes[i];
-            shaderPrograms[i]->UseProgram();
+            shaderPrograms[i].UseProgram();
             SetMVP(mesh->Ptr(), shaderPrograms[i]);
 
             glBindVertexArray(VAOs[i]);
@@ -136,12 +136,12 @@ namespace Rendering
         delete visibleVoxels;
     }
 
-    void SetMVP(Voxel::VoxelMesh* mesh, ShaderProgram* program) 
+    void SetMVP(Voxel::VoxelMesh* mesh, ShaderProgram program) 
     {
-        program->SetMat4x4("MVP_MATRIX", targetCamera->Ptr()->projectionMatrix * targetCamera->Ptr()->viewMatrix * mesh->GetModelMatrix());
+        program.SetMat4x4("MVP_MATRIX", targetCamera->Ptr()->projectionMatrix * targetCamera->Ptr()->viewMatrix * mesh->GetModelMatrix());
     }
 
-    void SetFaceRotationMatrices(ShaderProgram* program)
+    void SetFaceRotationMatrices(ShaderProgram program)
     {
         float pi = 3.14159265358979323846;
         glm::vec3 rotations[6] = {
@@ -166,15 +166,24 @@ namespace Rendering
             std::string buf("FACE_ROT_MATRICES[");
             buf.append(std::to_string(i));
             buf.append("]");
-            program->SetMat4x4(buf.c_str(), rotatedFaceMat);
+            program.SetMat4x4(buf.c_str(), rotatedFaceMat);
         }
     }
 
-    void SetVoxelBufferDimensions(Voxel::VoxelMesh* mesh, ShaderProgram* program)
+    void SetVoxelBufferDimensions(Voxel::VoxelMesh* mesh, ShaderProgram program)
     {
         glm::uvec3 bufferDimensions = mesh->GetVoxelArrayDimensions();
-        program->SetUInt("MAXSIZE_X", bufferDimensions.x);
-        program->SetUInt("MAXSIZE_Y", bufferDimensions.y);
-        program->SetUInt("MAXSIZE_Z", bufferDimensions.z);
+        program.SetUInt("MAXSIZE_X", bufferDimensions.x);
+        program.SetUInt("MAXSIZE_Y", bufferDimensions.y);
+        program.SetUInt("MAXSIZE_Z", bufferDimensions.z);
+    }
+
+    void DestroyRenderer() 
+    {
+        delete[] shaderPrograms;
+        delete[] VAOs;
+        delete[] VBOs;
+        delete[] EBOs;
+        delete[] visibleVoxelCount;
     }
 }
